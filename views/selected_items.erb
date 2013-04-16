@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title><%=Title%></title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="/images/favicon.ico" rel="shortcut icon">
+	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="/Flexigrid/css/flexigrid.css">
+	<link rel="stylesheet" type="text/css" href="/bootstrap_datepicker/css/datepicker.css">
+	
+	<script type="text/javascript" src="/jquery_1_8_3.js"></script>
+	<script type="text/javascript" src="/bootstrap/js/bootstrap.js"></script>
+	<script type="text/javascript" src="/Flexigrid/js/flexigrid.js"></script>
+	<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
+	<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
+	
+	
+
+	<script type="text/javascript">
+
+	$(document).ready(function() {
+
+		$("#select_items_table").flexigrid({
+			url: '/table_selected_items',
+			dataType: "json",
+			colModel : [
+				{display: 'Виробник', name : 'brand', width : 80, sortable : true, align: 'left'},
+				{display: 'Марка', name : 'family', width : 120, sortable : true, align: 'left'},
+				{display: 'Типорозмір', name : 'dimensiontype', width : 120, sortable : true, align: 'left'},
+				{display: 'Боковина', name : 'sidewall', width : 60, sortable : true, align: 'left'},
+				{display: 'Країна', name : 'origin', width : 50, sortable : true, align: 'left'},
+				{display: 'Run Flat', name : 'runflat', width : 50, sortable : true, align: 'left'},
+				{display: 'DOT', name : 'productiondate', width : 40, sortable : true, align: 'left'},
+				{display: 'Сезон', name : 'season', width : 40, sortable : true, align: 'left'},
+				{display: 'Залишок', name : 'remain', width : 50, sortable : true, align: 'left'},
+				{display: 'Склад', name : 'supplier', width : 50, sortable : true, align: 'left'},
+				{display: 'Постачальник', name : 'suppliercomment', width : 80, sortable : true, align: 'left'},
+				{display: 'Роздрібна ціна', name : 'rp', width : 80, sortable : true, align: 'left'},
+				{display: 'Гуртова ціна', name : 'bp', width : 70, sortable : true, align: 'left'},
+				{display: 'Вхідна ціна', name : 'sp', width : 70, sortable : true, align: 'left'},
+				{display: 'Гуртова ціна з ПДВ', name : 'bpvat', width : 100, sortable : true, align: 'left'},
+				{display: 'Дата', name : 'actualdate', width : 70, sortable : true, align: 'left'},
+				{display: 'Вхідний рядок', name : 'sourcestring', width : 600, sortable : true, align: 'left'}
+				],
+			params: <%=@checked_array.to_json%>,	
+			sortname: "rp",
+			sortorder: "asc",
+			usepager: true,
+			useRp: true,
+			rp: 100,
+			showTableToggleBtn: true,
+			width: setWidth(),
+			height: setHeight()
+		});		
+		
+		$('#back_button').click(function(){
+			parent.history.back();
+			return false;
+		});
+
+	});
+	
+
+		function setHeight(){
+			var value_height = $(window).height() - $("#filter_form").outerHeight(true) - 250;
+			return value_height
+		}
+
+		function setWidth(){
+			return $("#content").width() - 10;
+		}
+	</script>
+	<style>
+		body {	
+			font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
+			font-size: 12px;
+		}
+
+		.flexigrid div.pDiv2 {
+			padding-left: 15%;
+			font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
+			font-size: 12px;
+		}
+		.wrap_value{ 
+			white-space: nowrap; 
+			overflow: hidden; 
+			text-overflow: ellipsis; 
+	   	}
+	   	.rp_dropdown
+		{
+			height: 25px;
+			width: 70px;
+			padding: 2px;
+		}
+	   	.span3 { margin-left: 1%; }
+
+		.row-fluid .span21, .row-fluid .span22 {
+			min-height: 0px;
+		}
+		.row-fluid .span3, .row-fluid .span2{
+			min-height: 0px;
+			cursor: pointer;
+		}
+		.span4 .input-append{
+			cursor: pointer;
+		}
+		
+		.container{
+			margin-top: 50px;
+		}
+		
+	</style>
+</head>
+
+<body>
+	<div class="container" >
+		<%if @show_table%>
+			<table id="select_items_table"></table>
+		<%else%>
+			<div id="message_id" class="alert alert-info" align="center">
+				<strong><%=@message%></strong>
+    		</div>
+		<%end%>
+		<input id="back_button" type="button" value="Back">
+	</div>
+</body>
+</html>
