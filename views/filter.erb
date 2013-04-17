@@ -260,6 +260,32 @@
 				$(this).parents('.accordion-group').find('div[id^="quantity"]').html('<strong>'+ checkbox_length + ' з <span>' + checkbox_length + '</span></strong>');
 			else 
 				$(this).parents('.accordion-group').find('div[id^="quantity"]').html('<strong>0 з <span>' + checkbox_length +'</span></strong>');
+			if ($('input[name^="checked_brand"]:checked').length < $('input[name^="checked_brand"]').length){
+				$('#checked_all').removeAttr("checked");
+			} else {
+				$('#checked_all').attr("checked","checked");
+			}		
+		});
+				
+		$('.span2').delegate('#checked_all', 'click', function (e) {
+			if ($(this).is(':checked'))
+			{
+				$('input[name^="checked_brand"]').attr('checked','checked');
+				$('input[name^="checked_id"]').attr('checked','checked');
+			}
+			else
+			{
+				$('input[name^="checked_brand"]').removeAttr('checked');
+				$('input[name^="checked_id"]').removeAttr('checked');
+			}
+			$('.accordion-group').each(function (index, domEle) {
+				brand_check = $(domEle).find('.well_checkbox').find('input:checkbox');
+				var checkbox_length = brand_check.parents('.accordion-group').find('div[id^="quantity"]').find('span').text();
+				if (brand_check.is(':checked'))
+					brand_check.parents('.accordion-group').find('div[id^="quantity"]').html('<strong>'+ checkbox_length + ' з <span>' + checkbox_length + '</span></strong>');
+				else 
+					brand_check.parents('.accordion-group').find('div[id^="quantity"]').html('<strong>0 з <span>' + checkbox_length +'</span></strong>');
+			});
 		});
 		
 		$('.accordion-group').each(function (index, domEle) {
@@ -271,19 +297,7 @@
 				brand_check.parents('.accordion-group').find('div[id^="quantity"]').html('<strong>0 з <span>' + checkbox_length +'</span></strong>');
 		});
 		
-		
-		$('.span2').delegate('#checked_all', 'click', function (e) {
-			if ($(this).is(':checked'))
-			{
-				$('input[name^="checked_brand"]').attr('checked','checked');
-				$('input[name^="checked_id"]').attr('checked','checked');
-			}
-			else
-			{
-				$('input[name^="checked_brand"]').removeAttr('checked');
-				$('input[name^="checked_id"]').removeAttr('checked');
-			}	
-		});
+
 		
 	});
 	
