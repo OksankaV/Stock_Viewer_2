@@ -677,6 +677,7 @@
 				if (this.loading) {
 					return true;
 				}
+				$(g.bDiv).scrollTop(0);
 				switch (ctype) {
 					case 'first':
 						p.newp = 1;

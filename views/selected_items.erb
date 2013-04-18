@@ -64,7 +64,7 @@
 	
 
 		function setHeight(){
-			var value_height = $(window).height() - $("#filter_form").outerHeight(true) - 250;
+			var value_height = $(window).height() - $("#filter_form").outerHeight(true) - 200;
 			return value_height
 		}
 
@@ -111,6 +111,11 @@
 			margin-top: 50px;
 		}
 		
+		.back_button{
+			margin-top: 10px;
+			
+		}
+		
 	</style>
 </head>
 
@@ -123,7 +128,9 @@
 				<strong><%=@message%></strong>
     		</div>
 		<%end%>
-		<input id="back_button" type="button" value="Back">
+		<div class="back_button" align="center">
+			<button class="btn" id="back_button" ><i class="icon-arrow-left"></i> <strong>Повернутися до фільтру</strong></button>
+		</div>	
 	</div>
 </body>
 </html>
