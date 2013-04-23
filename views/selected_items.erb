@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title><%=Title%></title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="/images/favicon.ico" rel="shortcut icon">
-	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="/Flexigrid/css/flexigrid.css">
-	<link rel="stylesheet" type="text/css" href="/bootstrap_datepicker/css/datepicker.css">
-	
-	<script type="text/javascript" src="/jquery_1_8_3.js"></script>
-	<script type="text/javascript" src="/bootstrap/js/bootstrap.js"></script>
-	<script type="text/javascript" src="/Flexigrid/js/flexigrid.js"></script>
-	<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
-	<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
-	
-	
-
+<% content_for :head do %>
 	<script type="text/javascript">
 
 	$(document).ready(function() {
@@ -35,14 +16,15 @@
 				{display: 'DOT', name : 'productiondate', width : 40, sortable : true, align: 'left'},
 				{display: 'Сезон', name : 'season', width : 40, sortable : true, align: 'left'},
 				{display: 'Залишок', name : 'remain', width : 50, sortable : true, align: 'left'},
-				{display: 'Склад', name : 'supplier', width : 50, sortable : true, align: 'left'},
+				<%if @show_all_columns == true%>{display: 'Склад', name : 'supplier', width : 50, sortable : true, align: 'left'},<%end%>
 				{display: 'Постачальник', name : 'suppliercomment', width : 80, sortable : true, align: 'left'},
 				{display: 'Роздрібна ціна', name : 'rp', width : 80, sortable : true, align: 'left'},
 				{display: 'Гуртова ціна', name : 'bp', width : 70, sortable : true, align: 'left'},
-				{display: 'Вхідна ціна', name : 'sp', width : 70, sortable : true, align: 'left'},
+				<%if @show_all_columns == true%>{display: 'Вхідна ціна', name : 'sp', width : 70, sortable : true, align: 'left'},	<%end%>
 				{display: 'Гуртова ціна з ПДВ', name : 'bpvat', width : 100, sortable : true, align: 'left'},
-				{display: 'Дата', name : 'actualdate', width : 70, sortable : true, align: 'left'},
-				{display: 'Вхідний рядок', name : 'sourcestring', width : 600, sortable : true, align: 'left'}
+				{display: 'Дата', name : 'actualdate', width : 70, sortable : true, align: 'left'}
+				<%if @show_all_columns == true%>,
+				{display: 'Вхідний рядок', name : 'sourcestring', width : 600, sortable : true, align: 'left'}<%end%>
 				],
 			params: <%=@checked_array.to_json%>,	
 			sortname: "rp",
@@ -107,20 +89,14 @@
 			cursor: pointer;
 		}
 		
-		.container{
-			margin-top: 50px;
-		}
-		
 		.back_button{
 			margin-top: 10px;
 			
 		}
 		
 	</style>
-</head>
+<%end%>
 
-<body>
-	<div class="container" >
 		<%if @show_table%>
 			<table id="select_items_table"></table>
 		<%else%>
@@ -131,6 +107,3 @@
 		<div class="back_button" align="center">
 			<button class="btn" id="back_button" ><i class="icon-arrow-left"></i> <strong>Повернутися до фільтру</strong></button>
 		</div>	
-	</div>
-</body>
-</html>

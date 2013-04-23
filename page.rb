@@ -6,7 +6,20 @@ require 'json'
 require 'cgi'
 require 'net/http'
 require 'uri'
+
+require_relative 'lib/content'
 set :protection, :except => :ip_spoofing
+
+admin_data_hash = JSON.parse(IO.read('lib/admin.json'))
+set :username,admin_data_hash['username']
+set :token,admin_data_hash['token']
+set :password,admin_data_hash['password']
+
+
+helpers do
+	def admin? ; request.cookies[settings.username] == settings.token ; end
+	def protected! ; halt [ 401, 'Not Authorized' ] unless admin? ; end
+end
 
 
 if File.exists?("tyre.db")
@@ -282,7 +295,7 @@ get '/' do
 		@message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"	
 	end
 
-    erb :filter
+	erb :filter
 
 end
 
@@ -488,7 +501,16 @@ post '/selected_items' do
 		@checked_array.push(hash)
 	end	
 	@message = "Ви не вибрали жодного елементу"
-	erb :selected_items
+	
+	if admin?
+		protected!
+		@show_all_columns = true 
+		erb :selected_items
+	else
+		@show_all_columns = false
+		erb :selected_items
+	end 
+	
 end
 
 post '/table_selected_items' do
@@ -737,6 +759,27 @@ get '/models' do
     
     erb :models
 end
+
+
+get '/login_form' do
+	if params[:error] == "true"
+		@message_incorect = true
+	else
+		@message_incorect = false
+	end
+	erb :login_form 
+end 
+
+post '/login' do
+	if params['username'] == settings.username && params['password'] == settings.password
+		response.set_cookie(settings.username,settings.token) 
+		redirect '/'
+	else
+		redirect '/login_form?error=true'
+	end
+end
+
+get('/logout'){ response.set_cookie(settings.username, false) ; redirect '/' }
 
 __END__
 

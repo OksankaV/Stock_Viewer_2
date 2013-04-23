@@ -1,26 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title><%=Title%></title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="/images/favicon.ico" rel="shortcut icon">
-	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
-	<link rel="stylesheet" type="text/css" href="/Flexigrid/css/flexigrid.css">
-	<link rel="stylesheet" type="text/css" href="/bootstrap_datepicker/css/datepicker.css">
-	
-	<script type="text/javascript" src="/jquery_1_8_3.js"></script>
-	<script type="text/javascript" src="/bootstrap/js/bootstrap.js"></script>
-	<script type="text/javascript" src="/Flexigrid/js/flexigrid.js"></script>
-	<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
-	<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
-	
-	
-
+<% content_for :head do %>
 	<script type="text/javascript">
-	
-
 	$(document).ready(function() {
 			
 		$('#tyre_brand_typeahead').typeahead({
@@ -437,10 +416,8 @@
 		}
 		
 	</style>
-</head>
+<%end%>	
 
-<body>
-	<div class="container" >
 	<form method="GET" id="filter_form" action="">
 		<div class="row-fluid">
 			<div class="span4 well_family">
@@ -736,6 +713,4 @@
     		</div>
 		<%end%>
 		</form>
-	</div>
-</body>
-</html>
+

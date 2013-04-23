@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%=Title%></title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+		<link href="/images/favicon.ico" rel="shortcut icon">
+		<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="/Flexigrid/css/flexigrid.css">
+		<link rel="stylesheet" type="text/css" href="/bootstrap_datepicker/css/datepicker.css">
+	
+		<script type="text/javascript" src="/jquery_1_8_3.js"></script>
+		<script type="text/javascript" src="/bootstrap/js/bootstrap.js"></script>
+		<script type="text/javascript" src="/Flexigrid/js/flexigrid.js"></script>
+		<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
+		<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
+		
+		<%= yield_content :head %>
+	</head>
+	<body>
+		<div class="container">
+			<div class="navbar">
+				<div class="navbar-inner">
+					<a class="brand" href="/">Каталог шин</a>
+					<div class="pull-left">
+						<ul class="nav">
+						<%if admin?%>	
+							<li><a href='/'>Повний каталог шин</a></li>
+							<!---<li><a href='/filter_limited'>Обмежений каталог шин</a></li>-->
+						<%else%>
+							<li><a href='/'>Каталог шин</a></li>
+						<%end%> 	
+						</ul>	
+					</div>
+					<div class="pull-right">
+						<ul class="nav">
+						<%if admin?%>	
+							<li><a href='/logout'>Вийти <strong><%=settings.username%></strong></a></li>
+						<%else%>
+							<li><a href='/login_form'>Увійти</a></li>
+						<%end%> 	
+						</ul>	
+					</div>
+				</div>
+			</div>
+			<%= yield%>
+		</div>
+	</body> 
+</html> 
