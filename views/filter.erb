@@ -1,7 +1,7 @@
 <% content_for :head do %>
 	<script type="text/javascript">
 	$(document).ready(function() {
-			
+
 		$('#tyre_brand_typeahead').typeahead({
 			source: <%=Tyre_brand_name.to_json%>,
 			items: 20,
@@ -342,11 +342,9 @@
 
 		
 	</script>
+	
 	<style>
-		body {	
-			font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
-			font-size: 12px;
-		}
+	
 		.well_family {
 			background-color: #FFFFFF;
 			border: 1px solid #A1DBFF ;
@@ -415,9 +413,27 @@
 			cursor: pointer;
 		}
 		
+		 a #vverh { 
+			 display: none; 
+			 position: fixed; 
+			 margin-left: -104%; /* своё значение */ 
+			 margin-left: -webkit-calc(-100% - 1); /* вместо 7em своё значение */ 
+			 margin-left: calc(-100% - 1); /* вместо 7em своё значение */ 
+			 padding: 100% 1% 0 99%; bottom: 0; 
+			 font: 11px/100% Arial, Helvetica, sans-serif; 
+			 text-decoration: none; color: #bbb; -webkit-transition: 1s; transition: 1s; 
+		 } 
+		 a #vverh:before { position: absolute; 
+			 content: url(http://3.bp.blogspot.com/-Q0hVWzKDCJo/Tpar8l5wvJI/AAAAAAAACZ4/LbpuEBAIQAU/s60/strelka.png); 
+			 margin: -55px 0 0 -12px; 
+		 } 
+		 a #vverh:hover {
+			 color: #000; 
+			 background-color: rgba(0,0,0,.3);
+		 } 
+		
 	</style>
 <%end%>	
-
 	<form method="GET" id="filter_form" action="">
 		<div class="row-fluid">
 			<div class="span4 well_family">
@@ -634,7 +650,7 @@
 					<div class="span22">						
 						<button id="show_items_submit" class="btn btn-block" type="button" onclick="submit_show_items()"><strong>Показати всі вибрані елементи</strong></button>	
 					</div>
-				</div>
+				</div>	
 				<div class="accordion" id="accordion2">
 				<%i=0%>
 				<%@select_brand_price_hash.each_pair do |brand, price|%>	

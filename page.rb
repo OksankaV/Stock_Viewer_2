@@ -470,7 +470,8 @@ post '/selected_items' do
     select_date = params[:date]
     select_date = "" if select_date == nil 
     select_remain = params[:remain]
-    select_remain = "" if select_remain == nil 
+    select_remain = "" if select_remain == nil
+
 	@show_table = true
 	checked_id_array = params[:checked_id]
 	checked_id_array = [] if checked_id_array == nil
@@ -504,10 +505,12 @@ post '/selected_items' do
 	
 	if admin?
 		protected!
-		@show_all_columns = true 
+		#@show_all_columns = true
+		
+		@admin_login = true
 		erb :selected_items
 	else
-		@show_all_columns = false
+		@admin_login = false
 		erb :selected_items
 	end 
 	

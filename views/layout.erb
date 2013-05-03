@@ -16,26 +16,33 @@
 		<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
 		<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
 		
+		<style>
+   		body {
+			font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
+			font-size: 12px;
+			padding-top: 60px; 
+    	}
+ 
+		</style>
+		
 		<%= yield_content :head %>
 	</head>
 	<body>
-		<div class="container">
-			<div class="navbar">
-				<div class="navbar-inner">
+		<div class="navbar navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
 					<a class="brand" href="/">Каталог шин</a>
 					<div class="pull-left">
 						<ul class="nav">
-						<%if admin?%>	
-							<li><a href='/'>Повний каталог шин</a></li>
-							<!---<li><a href='/filter_limited'>Обмежений каталог шин</a></li>-->
-						<%else%>
-							<li><a href='/'>Каталог шин</a></li>
-						<%end%> 	
+							<li><a href='/'>Каталог шин</a></li>	
 						</ul>	
 					</div>
 					<div class="pull-right">
 						<ul class="nav">
-						<%if admin?%>	
+						<%if admin?%>
+							<%if @admin_login == true%>
+							<li><a id="show_columns">Неповний каталог</a></li>
+							<%end%> 
 							<li><a href='/logout'>Вийти <strong><%=settings.username%></strong></a></li>
 						<%else%>
 							<li><a href='/login_form'>Увійти</a></li>
@@ -43,7 +50,9 @@
 						</ul>	
 					</div>
 				</div>
-			</div>
+			</div>	
+		</div>
+		<div class="container">
 			<%= yield%>
 		</div>
 	</body> 
