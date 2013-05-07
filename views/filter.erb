@@ -275,9 +275,11 @@
 			else 
 				brand_check.parents('.accordion-group').find('div[id^="quantity"]').html('<strong>0 з <span>' + checkbox_length +'</span></strong>');
 		});
-		
 
-		
+		$('body').attr('style','margin-top:'+$(".navbar").outerHeight(true)+'px;');
+		$('#filter_form').attr('style','padding-top: 10px; margin-bottom: 0px; padding-bottom: 11px;');
+		$('#select_items_form').attr('style','margin-top:'+$("#filter_form").outerHeight(true)+'px;');
+		$('.accordion').attr('style','padding-top:'+$(".fixed2").outerHeight(true)+'px; margin-top:-1px;');
 	});
 	
 	
@@ -412,28 +414,31 @@
 		.span4 .input-append{
 			cursor: pointer;
 		}
+		 
+		.fixed {
+			display:block; 
+			position:fixed;
+			background:#fff; 
+			margin:0 auto; 
+			z-index:102;
+		}
 		
-		 a #vverh { 
-			 display: none; 
-			 position: fixed; 
-			 margin-left: -104%; /* своё значение */ 
-			 margin-left: -webkit-calc(-100% - 1); /* вместо 7em своё значение */ 
-			 margin-left: calc(-100% - 1); /* вместо 7em своё значение */ 
-			 padding: 100% 1% 0 99%; bottom: 0; 
-			 font: 11px/100% Arial, Helvetica, sans-serif; 
-			 text-decoration: none; color: #bbb; -webkit-transition: 1s; transition: 1s; 
-		 } 
-		 a #vverh:before { position: absolute; 
-			 content: url(http://3.bp.blogspot.com/-Q0hVWzKDCJo/Tpar8l5wvJI/AAAAAAAACZ4/LbpuEBAIQAU/s60/strelka.png); 
-			 margin: -55px 0 0 -12px; 
-		 } 
-		 a #vverh:hover {
-			 color: #000; 
-			 background-color: rgba(0,0,0,.3);
-		 } 
+		.fixed2 {
+			display:block; 
+			border:1px solid #FFFFFF;
+			position:fixed;
+			background:#fff; 
+			margin:0 auto; 
+			z-index:101;
+		}
+		
+		#select_items_form{background-color: #FFFFFF;}
+		
 		
 	</style>
-<%end%>	
+<%end%>
+	
+	<div class="fixed span24"> 
 	<form method="GET" id="filter_form" action="">
 		<div class="row-fluid">
 			<div class="span4 well_family">
@@ -639,10 +644,14 @@
 			</div>
 		</div>	
 		</form>
+	</div>	
+
+	
 		<form id="select_items_form" method="POST" action="/selected_items">
 		<%if @select_sizes.empty? == false and @select_sizes != nil and @press_submit_button == true%>
 			<div id="show_data_table">
 			<%if @show_table == true%>
+				<div class="span24 fixed2">
 				<div class="row-fluid">
 					<div class="span2" align="center"><div class="well_family">	
 						<input id="checked_all" type="checkbox" checked="checked">
@@ -650,6 +659,7 @@
 					<div class="span22">						
 						<button id="show_items_submit" class="btn btn-block" type="button" onclick="submit_show_items()"><strong>Показати всі вибрані елементи</strong></button>	
 					</div>
+				</div>
 				</div>	
 				<div class="accordion" id="accordion2">
 				<%i=0%>

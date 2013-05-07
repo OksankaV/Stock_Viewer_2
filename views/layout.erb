@@ -16,13 +16,17 @@
 		<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
 		<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
 		
+		<script type="text/javascript">
+		$(document).ready(function() {
+			var navbar = $(".navbar").outerHeight(true) + 10;
+			$('body').attr('style','margin-top:'+navbar+'px;');
+		});
+		</script>
 		<style>
    		body {
 			font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
 			font-size: 12px;
-			padding-top: 60px; 
     	}
- 
 		</style>
 		
 		<%= yield_content :head %>
