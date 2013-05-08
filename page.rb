@@ -7,10 +7,10 @@ require 'cgi'
 require 'net/http'
 require 'uri'
 
-require_relative 'lib/content'
+require_relative 'public/lib/content'
 set :protection, :except => :ip_spoofing
 
-admin_data_hash = JSON.parse(IO.read('lib/admin.json'))
+admin_data_hash = JSON.parse(IO.read('public/lib/admin.json'))
 set :username,admin_data_hash['username']
 set :token,admin_data_hash['token']
 set :password,admin_data_hash['password']
