@@ -65,6 +65,10 @@ Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'seas
     end
 
 def select_values(param_select_values,new_param_value,db_array)
+p '==========='
+	p param_select_values
+	p new_param_value
+	p db_array
     if param_select_values == nil
     	select_array = []
     else
@@ -85,6 +89,11 @@ def select_values(param_select_values,new_param_value,db_array)
 end
 
 def filter_select(select, value, check_value, text, hash_key)
+	p select
+	p value
+	p check_value
+	p text
+	p hash_key
     if check_value.include?(value)
 		select = select + text
         @bind_hash[hash_key.to_sym] = value
@@ -106,6 +115,7 @@ end
 get '/' do
     @message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"
     @message_no_data = "Немає даних, що відповідають вибраним значенням"
+    p params
     if params[:press_reset_button] == "true"
     	@select_brands = []
 		@select_families = []
@@ -119,6 +129,13 @@ get '/' do
 		@select_families = select_values(params[:tyre_family_selected],params[:tyre_family_typeahead],Tyre_family_name)
 		@select_sizes = select_values(params[:tyre_size_selected],params[:tyre_size_typeahead],Tyre_size)
 		@select_diameters = select_values(params[:tyre_diameter_selected],params[:tyre_diameter_typeahead],Tyre_diameter)
+		#if params[:tyre_season_selected] != nil
+		#	select_seasons = []
+		#	params[:tyre_season_selected].each do |value|
+		#		select_seasons.push(Seasons.index(value).to_s)
+		#	end
+		#end
+			
 		@select_seasons = select_values(params[:tyre_season_selected],Seasons.index(params[:tyre_season_typeahead]).to_s,Tyre_season)
 
 		if params[:tyre_date_selected] == nil
@@ -130,11 +147,11 @@ get '/' do
 				@select_date = ""
 			end	
 		end
-		if params[:input_date] == nil
+		if params[:tyre_date_typeahead] == nil
 			@select_date = ""
 		else	
-			if params[:input_date] != ""
-				@select_date = params[:input_date]
+			if params[:tyre_date_typeahead] != ""
+				@select_date = params[:tyre_date_typeahead]
 			end
 		end	
 	
@@ -276,7 +293,7 @@ get '/' do
 				@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
 			end
 	
-			select_string = select_string + "group by brand order by brand"
+			p select_string = select_string + "group by brand order by brand"
 
 			select_brand_price_array = db.execute(select_string, @bind_hash)
 	

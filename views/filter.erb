@@ -7,16 +7,17 @@
 			items: 20,
 			updater: function(item){
 				add_to_filter('brand',item); 
-				return item;
+				return "";
 			}	
 		});
+		
 
 		$('#tyre_family_typeahead').typeahead({
 			source: <%=@tyre_family_help_array.to_json%>,
 			items: 20,
 			updater: function(item) {
 				add_to_filter('family',item);
-				return item;
+				return "";
 			}	
 		});
 
@@ -25,7 +26,7 @@
 			items: 20,
 			updater: function(item) {
 				add_to_filter('size',item);
-				return item;
+				return "";
 			}	
 		});
 
@@ -34,7 +35,7 @@
 			items: 20,
 			updater: function(item) {
 				add_to_filter('diameter',item);
-				return item;
+				return "";
 			}	
 		});
 		
@@ -43,7 +44,7 @@
 			items: 20,
 			updater: function(item) {
 				add_to_filter('remain',item);
-				return item;
+				return "";
 			}	
 		});
 		
@@ -52,8 +53,8 @@
 			source: <%=Seasons.to_json%>,
 			items: 20,
 			updater: function(item) {
-				add_to_filter('season',item);
-				return item;
+				add_to_filter('season',item,<%=Seasons.to_json%>.indexOf(item));
+				return "";
 			},
 			matcher: function(item) {
 				if (this.query == '*') {
@@ -93,7 +94,7 @@
 		<%elsif @select_families.empty? or @select_families == nil%>
 			$("#tyre_family_typeahead").focus();
 		<%elsif @select_date.empty? or @select_date == nil%>
-			$("#input_date").focus();
+			$("#tyre_date_typeahead").focus();
 		<%end%>	
 	
 
@@ -123,9 +124,10 @@
 		});
 		
 
-		$('#input_date').change(function(){
-			var item = $('#input_date').val();
+		$('#tyre_date_typeahead').change(function(){
+			var item = $('#tyre_date_typeahead').val();
 			add_to_filter('date',item);
+			$('#tyre_date_typeahead').val("");
 		});
 		
 		$("input:text").keypress(function(event) {
@@ -280,6 +282,8 @@
 		$('#filter_form').attr('style','padding-top: 10px; margin-bottom: 0px; padding-bottom: 11px;');
 		$('#select_items_form').attr('style','margin-top:'+$("#filter_form").outerHeight(true)+'px;');
 		$('.accordion').attr('style','padding-top:'+$(".fixed2").outerHeight(true)+'px; margin-top:-1px;');
+		
+			
 	});
 	
 	
@@ -293,7 +297,7 @@
 			}
 		}
 	
-		function send_form(){	
+		function send_form(){
 			$("#filter_form").submit();
 		}
 
@@ -319,14 +323,63 @@
 			);
 		}  
 
-		function add_to_filter(id_part,value){  
-			$('input[id=tyre_' + id_part + '_typeahead]').attr("value",value);
-			send_form();
+		function add_to_filter(id_part,value,season_index=""){  
+			$('input[id="tyre_' + id_part + '_typeahead"]').attr("value",value);
+			
+			if (id_part == 'size')
+			{
+				$('#search_button').removeClass("disabled");
+				$('#search_button').addClass("btn-primary");
+				$('#search_button').attr("onclick","submit_filter_form()");
+			}
+			var index = $('div[id=block_' + id_part + ']').parent().find('div[id^="remove_"]').length;
+			
+			if (id_part == "date" || id_part == "remain")
+			{ 	
+				$('div[id="block_' + id_part + '"]').parent().find('div').not('div[id="block_' + id_part + '"]').replaceWith('<div id="remove_' + id_part + '" class="row_fluid"><div class="span22 wrap_value">'+ value +'</div><div class="span2"><a onclick=remove_selected("remove_' + id_part + '","' + id_part + '")><i class="icon-remove"></i></a></div></div>');
+			} else {
+				$('div[id="block_' + id_part + '"]').parent().find('div[name="no_' + id_part + '"]').remove();
+				$('div[id="block_' + id_part + '"]').parent().find('div').last().after('<div id="remove_' + id_part + '_' + index + '" class="row_fluid"><div class="span22 wrap_value">'+ value +'</div><div class="span2"><a onclick=remove_selected("remove_' + id_part + '_' + index + '","' + id_part + '")><i class="icon-remove"></i></a></div></div>');
+			}
+			
+			if (id_part == "season")
+				$('div[id="block_' + id_part + '"]').parent().find('div').last().after('<input name="tyre_' + id_part + '_selected[]" type="hidden" value="' + season_index + '">');
+			else if	(id_part == "date" || id_part == "remain")
+				$('div[id="block_' + id_part + '"]').parent().find('div').last().after('<input name="tyre_' + id_part + '_selected" type="hidden" value="' + value + '">');
+			else
+				$('div[id="block_' + id_part + '"]').parent().find('div').last().after('<input name="tyre_' + id_part + '_selected[]" type="hidden" value="' + value + '">');
+				
+			$('.container').on('change','#filter_form', function(){
+			if ($('#block_size').parent().find('div[id^="remove_"]').length == 0)
+				$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+			else	
+				$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+			});
+			
+			$('#select_items_form').attr('style','margin-top:'+$("#filter_form").outerHeight(true)+'px;');
+			$('.accordion').attr('style','padding-top:'+$(".fixed2").outerHeight(true)+'px; margin-top:-1px;');
 		}
 
-		function remove_selected(remove_name){	
-			$('div[id=' + remove_name + ']').remove();
-			send_form();
+		function remove_selected(remove_name,id_part){	
+			$('div[id="' + remove_name + '"]').remove();
+			if ($('#block_size').parent().find('div[id^="remove_"]').length == 0)
+				$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+			else	
+				$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+			if ($('div[id="block_' + id_part + '"]').parent().find('div[id^="remove_"]').length == 0)
+			{
+				if (id_part == 'size')
+				{
+					$('div[id="block_' + id_part + '"]').parent().find('div').last().after('<div id="no_size" name="no_size" align="center">не введено</div>');
+					$('#search_button').addClass("disabled");
+					$('#search_button').removeClass("btn-primary");
+					$('#search_button').removeAttr("onclick");
+				}	
+				else
+					$('div[id="block_' + id_part + '"]').parent().find('div').last().after('<div name="no_' + id_part + '" align="center">всі</div>');	
+			}	
+			$('#select_items_form').attr('style','margin-top:'+$("#filter_form").outerHeight(true)+'px;');
+			$('.accordion').attr('style','padding-top:'+$(".fixed2").outerHeight(true)+'px; margin-top:-1px;');
 		}
 
 		function setHeight(){
@@ -341,6 +394,8 @@
 		function submit_show_items(){
 			$("#select_items_form").submit();
 		}
+		
+		
 
 		
 	</script>
@@ -442,7 +497,7 @@
 	<form method="GET" id="filter_form" action="">
 		<div class="row-fluid">
 			<div class="span4 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_size" class="well_family_head" align="center">
 					<strong>Ширина/Висота</strong>
 				</div>
 				<%if @select_sizes.empty? == false and @select_sizes != nil%>
@@ -452,78 +507,78 @@
 								<%=@select_sizes[size_index]%>	
 							</div>
 							<div class="span2">
-								<a onclick="remove_selected('<%='remove_size_'+size_index.to_s%>')"><i class="icon-remove"></i></a>
+								<a onclick="remove_selected('<%='remove_size_'+size_index.to_s%>','size')"><i class="icon-remove"></i></a>
 							</div>
 							<input name="tyre_size_selected[]" type="hidden" value="<%=@select_sizes[size_index].gsub(/\"/, "&quot;")%>">
 						</div>
 					<%end%>
 				<%else%>
-					<div align="center">не введено</div>	
+					<div id="no_size" name="no_size" align="center">не введено</div>	
 				<%end%>
 			</div>
 			
 			<div class="span3 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_diameter" class="well_family_head" align="center">
 					<strong>Діаметр</strong>
 				</div>
 				<%if @select_diameters.empty? == false and @select_diameters != nil%>
 					<%@select_diameters.each_index do |diameter_index|%>
 						<div id="<%='remove_diameter_'+diameter_index.to_s%>" class="row_fluid">
-							<div class="span21 wrap_value">
+							<div class="span22 wrap_value">
 								<%=@select_diameters[diameter_index]%>	
 							</div>
-							<div class="span3">
-								<a onclick="remove_selected('<%='remove_diameter_'+diameter_index.to_s%>')"><i class="icon-remove"></i></a>
+							<div class="span2">
+								<a onclick="remove_selected('<%='remove_diameter_'+diameter_index.to_s%>','diameter')"><i class="icon-remove"></i></a>
 							</div>
 							<input name="tyre_diameter_selected[]" type="hidden" value="<%=@select_diameters[diameter_index].gsub(/\"/, "&quot;")%>">
 						</div>
 					<%end%>
 				<%else%>
-					<div align="center">всі</div>	
+					<div name="no_diameter" align="center">всі</div>	
 				<%end%>
 			</div>
 			<div class="span3 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_season" class="well_family_head" align="center">
 					<strong>Сезон</strong>
 				</div>
 				<%if @select_seasons.empty? == false and @select_seasons != nil%>
 					<%@select_seasons.each_index do |season_index|%>
 						<div id="<%='remove_season_'+season_index.to_s%>" class="row_fluid">
-							<div class="span21 wrap_value">
+							<div class="span22 wrap_value">
 								<%=Seasons[@select_seasons[season_index].to_i]%>	
 							</div>
-							<div class="span3">
-								<a onclick="remove_selected('<%='remove_season_'+season_index.to_s%>')"><i class="icon-remove"></i></a>
+							<div class="span2">
+								<a onclick="remove_selected('<%='remove_season_'+season_index.to_s%>','season')"><i class="icon-remove"></i></a>
 							</div>
 							<input name="tyre_season_selected[]" type="hidden" value="<%=@select_seasons[season_index].gsub(/\"/, "&quot;")%>">
 						</div>
 					<%end%>
 				<%else%>
-					<div align="center">всі</div>	
+					<div name="no_season" align="center">всі</div>	
 				<%end%>
 			</div>
 			
 			<div class="span3 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_remain" class="well_family_head" align="center">
 					<strong>Кількість >=</strong>
 				</div>
 				<%if @select_remain.empty? == false and @select_remain != nil%>
 						<div id="remove_remain" class="row_fluid">
-							<div class="span21 wrap_value">
+							<div class="span22 wrap_value">
 								<%=@select_remain%>	
 							</div>
-							<div class="span3">
-								<a onclick="remove_selected('remove_remain')"><i class="icon-remove"></i></a>
+							<div class="span2">
+								<a onclick="remove_selected('remove_remain','remain')"><i class="icon-remove"></i></a>
 							</div>
 							<input name="tyre_remain_selected" type="hidden" value="<%=@select_remain%>">
 						</div>
 				<%else%>
-					<div align="center">всі</div>	
+					<div name="no_remain" align="center">всі</div>	
 				<%end%>
 			</div>
 			
 			<div class="span4 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_brand" class="well_family_head" align="center">
 					<strong>Виробники</strong>
 				</div>
 				<%if @select_brands.empty? == false and @select_brands != nil%>
@@ -533,17 +588,17 @@
 							<%=@select_brands[brand_index]%>	
 						</div>
 						<div class="span2">
-							<a onclick="remove_selected('<%='remove_brand_'+brand_index.to_s%>')"><i class="icon-remove"></i></a>
+							<a onclick="remove_selected('<%='remove_brand_'+brand_index.to_s%>','brand')"><i class="icon-remove"></i></a>
 						</div>
 						<input name="tyre_brand_selected[]" type="hidden" value="<%=@select_brands[brand_index].gsub(/\"/, "&quot;")%>"><br>
 					</div>
 					<%end%>
 				<%else%>
-					<div align="center">всі</div>	
+					<div name="no_brand" align="center">всі</div>	
 				<%end%>
 			</div>
 			<div class="span4 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_family" class="well_family_head" align="center">
 					<strong>Марки</strong>
 				</div>
 				<%if @select_families.empty? == false and @select_families != nil%>
@@ -553,33 +608,33 @@
 							<%=@select_families[family_index]%>	
 						</div>
 						<div class="span2">
-							<a onclick="remove_selected('<%='remove_family_'+family_index.to_s%>')"><i class="icon-remove"></i></a>
+							<a onclick="remove_selected('<%='remove_family_'+family_index.to_s%>','family')"><i class="icon-remove"></i></a>
 							<input name="tyre_family_selected[]" type="hidden" value="<%=@select_families[family_index].gsub(/\"/, "&quot;")%>">
 						</div>
 					</div>
 					<%end%>
 				<%else%>
-					<div align="center">всі</div>	
+					<div name="no_family" align="center">всі</div>	
 				<%end%>
 			</div>
 			
 			
 			<div class="span3 well_family">
-				<div class="well_family_head" align="center">
+				<div id="block_date" class="well_family_head" align="center">
 					<strong>Прайс від дати</strong>
 				</div>
 				<%if @select_date.empty? == false and @select_date != nil%>
 						<div id="remove_date" class="row_fluid">
-							<div class="span21 wrap_value">
+							<div class="span22 wrap_value">
 								<%=@select_date%>	
 							</div>
-							<div class="span3">
-								<a onclick="remove_selected('remove_date')"><i class="icon-remove"></i></a>
+							<div class="span2">
+								<a onclick="remove_selected('remove_date','date')"><i class="icon-remove"></i></a>
 							</div>
 							<input name="tyre_date_selected" type="hidden" value="<%=@select_date%>">
 						</div>
 				<%else%>
-					<div align="center">всі</div>	
+					<div name="no_date" align="center">всі</div>	
 				<%end%>
 			</div>
 		</div>	
@@ -615,11 +670,9 @@
 			<div class="span3">
 				<div class="row-fluid">
 				<div class="input-append date" id="datepicker"  data-date-format="dd/mm/yyyy">
-					<input id="input_date" name="input_date" class="span19" type="text" autocomplete="off">
+					<input id="tyre_date_typeahead" name="tyre_date_typeahead" class="span19" type="text" placeholder="Оберіть дату..." autocomplete="off" style="font-size: 12px;" disabled>
 					<div class="add-on showDate">
-						<div align="center">
-							<i class="icon-calendar"></i>
-						</div>	
+						<div align="center"><i class="icon-calendar"></i></div>	
 					</div>
 				</div>
 				</div>
@@ -630,7 +683,7 @@
 		<div class="row-fluid">
 			<div class="span16">
 				<%if @select_sizes.empty? == false and @select_sizes != nil%>
-					<button id="filter_submit" class="btn btn-block btn-primary" type="button" onclick="submit_filter_form()"><strong>Пошук</strong></button>
+					<button id="search_button" class="btn btn-block btn-primary" type="button" onclick="submit_filter_form()"><strong>Пошук</strong></button>
 				<%else%>
 					<button id="search_button" class="btn btn-block disabled" type="button"><strong>Пошук</strong></button>
 				<%end%>	
