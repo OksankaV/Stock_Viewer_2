@@ -24,6 +24,7 @@ end
 
 if File.exists?("tyre.db")
     db = SQLite3::Database.new("tyre.db")
+    p Price_date = File.new("tyre.db").mtime.strftime("(оновлено %d/%m/%Y о %R)")
 end
 
 Title = "Каталог шин"

@@ -39,15 +39,15 @@
 					<a class="brand" href="/">vsikolesa</a>
 					<div class="pull-left">
 						<ul class="nav">
-							<li><a href='/'>Каталог шин</a></li>	
+							<li><a href='/'>Каталог шин <%=Price_date%></a></li>
 						</ul>	
 					</div>
 					<div class="pull-right">
 						<ul class="nav">
 						<%if admin?%>
 							<%if @admin_login == true%>
-							<li><a id="show_columns">Неповний каталог</a></li>
-							<%end%> 
+								<li><a id="show_columns">Неповний каталог</a></li>
+							<%end%>
 							<li><a href='/logout'>Вийти <strong><%=settings.username%></strong></a></li>
 						<%else%>
 							<li><a href='/login_form'>Увійти</a></li>

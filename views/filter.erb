@@ -48,39 +48,7 @@
 			}	
 		});
 		
-
-		$('#tyre_season_typeahead').typeahead({
-			source: <%=Seasons.to_json%>,
-			items: 20,
-			updater: function(item) {
-				add_to_filter('season',item,<%=Seasons.to_json%>.indexOf(item));
-				return "";
-			},
-			matcher: function(item) {
-				if (this.query == '*') {
-					return true;
-				} else {
-					return item.indexOf(this.query) >= 0;
-				}
-			},
-			highlighter: function(item) {
-				return "<div>" + item + "</div>"
-				}
-		});
-		
-		$('html').click(function() {
-		   	$('').val('');
-			$('#tyre_season_typeahead').typeahead('hide');
-		});
-		
-		$('#tyre_season_typeahead').click(function(event){
-		   event.stopPropagation();
-		});
-		
-		$('.showAll').click(function(event){
-		   event.stopPropagation();
-		});
-		
+	
 		<%if @select_sizes.empty? or @select_sizes == nil%>
 			$("#tyre_size_typeahead").focus();
 		<%elsif @select_diameters.empty? or @select_diameters == nil%>
@@ -97,24 +65,6 @@
 			$("#tyre_date_typeahead").focus();
 		<%end%>	
 	
-
-
-		$('.showAll').click(function(event) {
-			var  input = $('#tyre_season_typeahead');
-			if(input.data('typeahead').shown == true) 
-			{ 
-				input.val('');
-				input.typeahead('hide');
-			} 
-			else 
-			{ 
-				input.val('*');
-				input.typeahead('focus');
-		        input.typeahead('lookup');
-		        input.val('');
-			}
-		});
-
 		
 		$('#datepicker').datepicker({
 			format: 'dd/mm/yyyy',
@@ -324,10 +274,11 @@
 		}  
 
 		function add_to_filter(id_part,value,season_index=""){  
-			$('input[id="tyre_' + id_part + '_typeahead"]').attr("value",value);
+			if (id_part != "season")
+				$('input[id="tyre_' + id_part + '_typeahead"]').attr("value",value);
 			
 			if (id_part == 'size')
-			{
+			{	
 				$('#search_button').removeClass("disabled");
 				$('#search_button').addClass("btn-primary");
 				$('#search_button').attr("onclick","submit_filter_form()");
@@ -358,6 +309,7 @@
 			
 			$('#select_items_form').attr('style','margin-top:'+$("#filter_form").outerHeight(true)+'px;');
 			$('.accordion').attr('style','padding-top:'+$(".fixed2").outerHeight(true)+'px; margin-top:-1px;');
+			
 		}
 
 		function remove_selected(remove_name,id_part){	
@@ -489,6 +441,15 @@
 		
 		#select_items_form{background-color: #FFFFFF;}
 		
+		
+		.season_group {
+			width: 25%;
+		}
+		
+		.image_size {
+			height: 19px;
+			overflow: auto;
+		}
 		
 	</style>
 <%end%>
@@ -645,16 +606,12 @@
 			<div class="span3">
 				<input id="tyre_diameter_typeahead" name="tyre_diameter_typeahead" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead">
 			</div>
-			<div class="span3">
-				<div class="row-fluid">
-					<div class="input-append">
-						<input id="tyre_season_typeahead" name="tyre_season_typeahead" type="text" class="input-block-level span19" autocomplete="off" data-provide="typeahead"/>
-						<div class="showAll add-on">
-							<div align="center">
-								<i class="icon-chevron-down"></i> 
-							</div>		
-						</div>
-					</div>
+			<div class="span3" align="center">
+				<div class="btn-group">
+					<button type="button" class="btn season_group" onclick="add_to_filter('season','літо','1')"><img src="/images/summer.png" class="image_size"/></button>
+					<button type="button" class="btn season_group" onclick="add_to_filter('season','зима','2')"><img src="/images/winter.png" class="image_size"/></button>
+					<button type="button" class="btn season_group" onclick="add_to_filter('season','в/c','3')"><img src="/images/all_season.png" class="image_size"/></button>
+					<button type="button" class="btn season_group" onclick="add_to_filter('season','-','0')"><img src="/images/question.png" class="image_size"/></button>
 				</div>
 			</div>
 			<div class="span3">
