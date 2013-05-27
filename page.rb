@@ -24,7 +24,7 @@ end
 
 if File.exists?("tyre.db")
     db = SQLite3::Database.new("tyre.db")
-    p Price_date = File.new("tyre.db").mtime.strftime("(оновлено %d/%m/%Y о %R)")
+    Price_date = File.new("tyre.db").mtime.strftime("(оновлено %d/%m/%Y о %R)")
 end
 
 Title = "Каталог шин"
@@ -35,7 +35,7 @@ Tyre_size = db.execute("select distinct sectionsize from price order by sections
 Tyre_diameter = db.execute("select distinct diameterc from price order by diameterc asc").flatten
 Tyre_season = db.execute("select distinct season from price order by diameterc asc").flatten
 Seasons = ["-", "літо", "зима", "в/c"]
-Seasons_images = ["question", "summer", "winter", "all_season"]
+Seasons_images = ["summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
 
 tyre_family_brand_name = db.execute("select distinct family, brand from price")
@@ -91,11 +91,6 @@ p '==========='
 end
 
 def filter_select(select, value, check_value, text, hash_key)
-	p select
-	p value
-	p check_value
-	p text
-	p hash_key
     if check_value.include?(value)
 		select = select + text
         @bind_hash[hash_key.to_sym] = value
@@ -137,8 +132,7 @@ get '/' do
 		#		select_seasons.push(Seasons.index(value).to_s)
 		#	end
 		#end
-			
-		@select_seasons = select_values(params[:tyre_season_selected],Seasons.index(params[:tyre_season_typeahead]).to_s,Tyre_season)
+		@select_seasons = select_values(params[:tyre_season_selected],"",Tyre_season)
 
 		if params[:tyre_date_selected] == nil
 			@select_date = ""
@@ -282,6 +276,7 @@ get '/' do
 					end
 					i += 1
 				end
+				select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 				select_string =  select_string + " ) "
 			end
 	
@@ -404,6 +399,7 @@ get '/table' do
 			end
 			i += 1
 		end
+		select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 		select_string =  select_string + " ) "
 	end
 	
@@ -620,6 +616,7 @@ post '/table_selected_items' do
 				end
 				i += 1
 			end
+			select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 			select_string =  select_string + " ) "
 		end
 	
