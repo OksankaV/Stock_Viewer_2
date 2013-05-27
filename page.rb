@@ -35,6 +35,7 @@ Tyre_size = db.execute("select distinct sectionsize from price order by sections
 Tyre_diameter = db.execute("select distinct diameterc from price order by diameterc asc").flatten
 Tyre_season = db.execute("select distinct season from price order by diameterc asc").flatten
 Seasons = ["-", "літо", "зима", "в/c"]
+Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
 
 tyre_family_brand_name = db.execute("select distinct family, brand from price")
@@ -211,6 +212,7 @@ get '/' do
 	@table_url= @table_href
 	@show_table = false
 	
+	
 	@bind_hash = {}
 
 	if @select_sizes.empty? == false
@@ -305,12 +307,17 @@ get '/' do
 			if @select_brand_price_hash.empty?
 				@show_table = false
 			end
-			
+			@search_primary_btn = ""
+			@show_primary_btn = "btn-primary"  
 		else
 			@message = "Для відображення даних натисніть ПОШУК"
+			@search_primary_btn = "btn-primary"
+			@show_primary_btn = "" 
 		end	
 	else 
-		@message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"	
+		@message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"
+		@search_primary_btn = "btn-primary"
+		@show_primary_btn = "" 	
 	end
 
 	erb :filter
