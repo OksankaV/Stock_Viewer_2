@@ -6,21 +6,21 @@
 					url: '/table_selected_items',
 					dataType: "json",
 					colModel : [
-						{display: 'Виробник', name : 'brand', width : 80, sortable : true, align: 'left'},
-						{display: 'Марка', name : 'family', width : 120, sortable : true, align: 'left'},
-						{display: 'Типорозмір', name : 'dimensiontype', width : 120, sortable : true, align: 'left'},
+						{display: 'Виробник', name : 'brand', width : 100, sortable : true, align: 'left'},
+						{display: 'Марка', name : 'family', width : 150, sortable : true, align: 'left'},
+						{display: 'Типорозмір', name : 'dimensiontype', width : 130, sortable : true, align: 'left'},
 						{display: 'Боковина', name : 'sidewall', width : 60, sortable : true, align: 'left'},
-						{display: 'Країна', name : 'origin', width : 50, sortable : true, align: 'left'},
+						{display: 'Країна', name : 'origin', width : 55, sortable : true, align: 'left'},
 						{display: 'Run Flat', name : 'runflat', width : 50, sortable : true, align: 'left'},
 						{display: 'DOT', name : 'productiondate', width : 40, sortable : true, align: 'left'},
 						{display: 'Сезон', name : 'season', width : 40, sortable : true, align: 'left'},
 						{display: 'Залишок', name : 'remain', width : 50, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: 'Склад', name : 'supplier', width : 50, sortable : true, align: 'left'},<%end%>
-						{display: 'Постачальник', name : 'suppliercomment', width : 80, sortable : true, align: 'left'},
-						{display: 'Роздрібна ціна', name : 'rp', width : 80, sortable : true, align: 'left'},
-						{display: 'Гуртова ціна', name : 'bp', width : 70, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: 'Склад', name : 'supplier', width : 55, sortable : true, align: 'left'},<%end%>
+						{display: 'Постачальник', name : 'suppliercomment', width : 85, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: 'Роздрібна ціна', name : 'rp', width : 80, sortable : true, align: 'left'},<%end%>
+						{display: 'Гуртова ціна', name : 'bp', width : 75, sortable : true, align: 'left'},
 						<%if @admin_login == true%>{display: 'Вхідна ціна', name : 'sp', width : 70, sortable : true, align: 'left'},<%end%>
-						{display: 'Гуртова ціна з ПДВ', name : 'bpvat', width : 100, sortable : true, align: 'left'},
+						{display: 'Гуртова ціна з ПДВ', name : 'bpvat', width : 110, sortable : true, align: 'left'},
 						{display: 'Дата', name : 'actualdate', width : 70, sortable : true, align: 'left'}
 						<%if @admin_login == true%>,
 						{display: 'Вхідний рядок', name : 'sourcestring', width : 600, sortable : true, align: 'left'}<%end%>
@@ -43,34 +43,15 @@
 		
 		<%if @admin_login == true%>
 		$('.nav').delegate('#show_columns','click', function (e) {
-			$('#show_columns').find('span').toggle();
-			if ($('td[abbr="supplier"]').is(':hidden'))
-			{
+			$('tr td[class="ndcol1"] input[value="9"]').parents('tr').children('td.ndcol2').click();
+			$('tr td[class="ndcol1"] input[value="11"]').parents('tr').children('td.ndcol2').click();	
+			$('tr td[class="ndcol1"] input[value="13"]').parents('tr').children('td.ndcol2').click();
+			$('tr td[class="ndcol1"] input[value="16"]').parents('tr').children('td.ndcol2').click();
+			
+			if ($('td[class="ndcol1"] input[value="9"]').is(':checked') && $('td[class="ndcol1"] input[value="11"]').is(':checked') && $('td[class="ndcol1"] input[value="13"]').is(':checked') && $('td[class="ndcol1"] input[value="16"]').is(':checked'))
 				$("#show_columns").text("Неповний каталог");
-				$('td[abbr="supplier"]').removeAttr('style');
-				$('th[abbr="supplier"]').removeAttr('hidden');
-				$('th[abbr="supplier"]').removeAttr('style');
-				
-				$('td[abbr="sp"]').removeAttr('style');
-				$('th[abbr="sp"]').removeAttr('hidden');
-				$('th[abbr="sp"]').removeAttr('style');
-				
-				$('td[abbr="sourcestring"]').removeAttr('style');
-				$('th[abbr="sourcestring"]').removeAttr('hidden');
-				$('th[abbr="sourcestring"]').removeAttr('style');
-			}
 			else
-			{
 				$("#show_columns").text("Повний каталог");
-				$('td[abbr="supplier"]').attr('style',"display: none;");
-				$('th[abbr="supplier"]').attr('hidden',"");
-				
-				$('td[abbr="sp"]').attr('style',"display: none;");
-				$('th[abbr="sp"]').attr('hidden',"");
-				
-				$('td[abbr="sourcestring"]').attr('style',"display: none;");
-				$('th[abbr="sourcestring"]').attr('hidden',"");
-			} 
 		});
 		<%end%>
 

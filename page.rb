@@ -21,10 +21,9 @@ helpers do
 	def protected! ; halt [ 401, 'Not Authorized' ] unless admin? ; end
 end
 
-
 if File.exists?("tyre.db")
     db = SQLite3::Database.new("tyre.db")
-    Price_date = File.new("tyre.db").mtime.strftime("(оновлено %d/%m/%Y о %R)")
+    Price_date = File.new("tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y о %R)")
 end
 
 Title = "Каталог шин"
@@ -35,7 +34,7 @@ Tyre_size = db.execute("select distinct sectionsize from price order by sections
 Tyre_diameter = db.execute("select distinct diameterc from price order by diameterc asc").flatten
 Tyre_season = db.execute("select distinct season from price order by diameterc asc").flatten
 Seasons = ["-", "літо", "зима", "в/c"]
-Seasons_images = ["summer", "winter", "all_season"]
+Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
 
 tyre_family_brand_name = db.execute("select distinct family, brand from price")
@@ -67,10 +66,6 @@ Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'seas
     end
 
 def select_values(param_select_values,new_param_value,db_array)
-p '==========='
-	p param_select_values
-	p new_param_value
-	p db_array
     if param_select_values == nil
     	select_array = []
     else
@@ -112,7 +107,6 @@ end
 get '/' do
     @message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"
     @message_no_data = "Немає даних, що відповідають вибраним значенням"
-    p params
     if params[:press_reset_button] == "true"
     	@select_brands = []
 		@select_families = []
@@ -291,7 +285,7 @@ get '/' do
 				@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
 			end
 	
-			p select_string = select_string + "group by brand order by brand"
+			select_string = select_string + "group by brand order by brand"
 
 			select_brand_price_array = db.execute(select_string, @bind_hash)
 	
@@ -538,7 +532,6 @@ post '/selected_items' do
 end
 
 post '/table_selected_items' do
-	p "--------------------------------"
  	select_brands = params[:brand]
 	select_brands = [] if select_brands == nil 	
     select_families = params[:family]
@@ -671,7 +664,7 @@ post '/table_selected_items' do
 
 
 	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i.to_i
-	p select_string = select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
+	select_string = select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
 		
 	all_data_array = []
 	select_all_data = db.execute(select_string, @bind_hash)
