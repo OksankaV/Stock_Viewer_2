@@ -6,24 +6,24 @@
 					url: '/table_selected_items',
 					dataType: "json",
 					colModel : [
-						{display: 'Виробник', name : 'brand', width : 100, sortable : true, align: 'left'},
-						{display: 'Марка', name : 'family', width : 150, sortable : true, align: 'left'},
-						{display: 'Типорозмір', name : 'dimensiontype', width : 130, sortable : true, align: 'left'},
-						{display: 'Боковина', name : 'sidewall', width : 60, sortable : true, align: 'left'},
-						{display: 'Країна', name : 'origin', width : 55, sortable : true, align: 'left'},
-						{display: 'Run Flat', name : 'runflat', width : 50, sortable : true, align: 'left'},
-						{display: 'DOT', name : 'productiondate', width : 40, sortable : true, align: 'left'},
-						{display: 'Сезон', name : 'season', width : 40, sortable : true, align: 'left'},
-						{display: 'Залишок', name : 'remain', width : 50, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: 'Склад', name : 'supplier', width : 55, sortable : true, align: 'left'},<%end%>
-						{display: 'Постачальник', name : 'suppliercomment', width : 85, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: 'Роздрібна ціна', name : 'rp', width : 80, sortable : true, align: 'left'},<%end%>
-						{display: 'Гуртова ціна', name : 'bp', width : 75, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: 'Вхідна ціна', name : 'sp', width : 70, sortable : true, align: 'left'},<%end%>
-						{display: 'Гуртова ціна з ПДВ', name : 'bpvat', width : 110, sortable : true, align: 'left'},
-						{display: 'Дата', name : 'actualdate', width : 70, sortable : true, align: 'left'}
+						{display: "<%=Table_Headers['brand']%>", name : 'brand', width : 100, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['family']%>", name : 'family', width : 150, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['dimensiontype']%>", name : 'dimensiontype', width : 130, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['sidewall']%>", name : 'sidewall', width : 60, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['origin']%>", name : 'origin', width : 55, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['runflat']%>", name : 'runflat', width : 50, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['productiondate']%>", name : 'productiondate', width : 40, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['season']%>", name : 'season', width : 40, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['remain']%>", name : 'remain', width : 50, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: "<%=Table_Headers['supplier']%>", name : 'supplier', width : 55, sortable : true, align: 'left'},<%end%>
+						{display: "<%=Table_Headers['suppliercomment']%>", name : 'suppliercomment', width : 85, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: "<%=Table_Headers['rp']%>", name : 'rp', width : 80, sortable : true, align: 'left'},<%end%>
+						{display: "<%=Table_Headers['bp']%>", name : 'bp', width : 75, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: "<%=Table_Headers['sp']%>", name : 'sp', width : 70, sortable : true, align: 'left'},<%end%>
+						{display: "<%=Table_Headers['bpvat']%>", name : 'bpvat', width : 110, sortable : true, align: 'left'},
+						{display: "<%=Table_Headers['actualdate']%>", name : 'actualdate', width : 70, sortable : true, align: 'left'}
 						<%if @admin_login == true%>,
-						{display: 'Вхідний рядок', name : 'sourcestring', width : 600, sortable : true, align: 'left'}<%end%>
+						{display: "<%=Table_Headers['sourcestring']%>", name : 'sourcestring', width : 600, sortable : true, align: 'left'}<%end%>
 						],
 					params: <%=@checked_array.to_json%>,	
 					sortname: "rp",
@@ -120,5 +120,9 @@
     		</div>
 		<%end%>
 		<div class="back_button" align="center">
-			<button class="btn" id="back_button" ><i class="icon-arrow-left"></i> <strong>Повернутися до фільтру</strong></button>
-		</div>	
+			<form action="/excel_file" method="POST">
+				<button class="btn" id="back_button" ><i class="icon-arrow-left"></i> <strong>Повернутися до фільтру</strong></button>
+				<button class="btn" id="excel_button" type="submit"><i class="icon-file"></i><strong> Зберегти у Excel-файл</strong></button>
+				<input type="hidden" name="excel_button" value='<%=@checked_array.to_json%>'>
+			</form>	
+		</div>

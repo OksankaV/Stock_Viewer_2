@@ -6,8 +6,10 @@ require 'json'
 require 'cgi'
 require 'net/http'
 require 'uri'
+require 'axlsx'
 
 require_relative 'public/lib/content'
+
 set :protection, :except => :ip_spoofing
 
 admin_data_hash = JSON.parse(IO.read('public/lib/admin.json'))
@@ -27,6 +29,8 @@ if File.exists?("tyre.db")
 end
 
 Title = "Каталог шин"
+Table_Headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова ціна з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
+
 
 Tyre_providers = db.execute("select distinct supplier from price")
 Tyre_size = db.execute("select distinct sectionsize from price order by sectionsize asc").flatten
@@ -199,7 +203,6 @@ get '/' do
 	make_href(@select_seasons,"&season","&season[]")
 	@table_url= @table_href
 	@show_table = false
-	
 	
 	@bind_hash = {}
 
@@ -662,7 +665,7 @@ post '/table_selected_items' do
 	
 	rows_count = db.execute(select_count, @bind_hash).flatten
 
-
+	@select_string_to_excel = select_string
 	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i.to_i
 	select_string = select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
 		
@@ -798,6 +801,245 @@ post '/login' do
 end
 
 get('/logout'){ response.set_cookie(settings.username, false) ; redirect '/' }
+
+
+post '/excel_file' do
+	@bind_hash = {}
+	select_params = JSON.parse(params[:excel_button])
+	checked_brands = []
+	checked_ids = []
+	select_sizes = []
+	select_brands = []
+	select_families = []
+	select_diameters = []
+	select_seasons = []
+	select_remain = ''
+	select_date = ''
+	select_params.each do |hash|
+		if hash["name"] == "checked_brand[]"
+			checked_brands.push(hash["value"])
+		end
+		if hash["name"] == "checked_id[]"
+			checked_ids.push(hash["value"])
+		end
+		if hash["name"] == "brand[]"
+			select_brands.push(hash["value"])
+		end
+		if hash["name"] == "size[]"
+			select_sizes.push(hash["value"])
+		end
+		if hash["name"] == "family[]"
+			select_families.push(hash["value"])
+		end
+		if hash["name"] == "diameter[]"
+			select_diameters.push(hash["value"])
+		end
+		if hash["name"] == "season[]"
+			select_seasons.push(hash["value"])
+		end
+		if hash["name"] == "remain"
+			select_remian = hash["value"]
+		end
+		if hash["name"] == "date"
+			select_date = hash["value"]
+		end	
+	end
+
+	select_string = "select * from price where"
+
+    if checked_brands.empty? == false
+    	select_string = select_string + " ( "
+		i=0
+		select_sizes.each do |tyre_sizes_check|
+			if i == 0
+				select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
+			else
+				select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+			end
+			i += 1
+		end
+		select_string =  select_string + " ) "
+	
+		if select_families.empty? == false
+			select_string = select_string + " and ( "
+			i=0
+			select_families.each do |tyre_families_check|
+				if i == 0
+					select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
+				else
+					select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
+				end
+				i += 1
+			end
+			select_string =  select_string + " ) "
+		end
+		if select_diameters.empty? == false
+			select_string = select_string + " and ( "
+			i=0
+			select_diameters.each do |tyre_diameters_check|
+				if i == 0
+					select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+				else
+					select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+				end
+				i += 1
+			end
+			select_string =  select_string + " ) "
+		end
+		if select_seasons.empty? == false
+			select_string = select_string + " and ( "
+			i=0
+			select_seasons.each do |tyre_seasons_check|
+				if i == 0
+					select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
+				else
+					select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+				end
+				i += 1
+			end
+			select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+			select_string =  select_string + " ) "
+		end
+	
+		if select_remain.empty? == false
+			select_string = select_string + " and (remain >= :remain or remain = 0) "
+			@bind_hash["remain".to_sym] = select_remain
+		end
+
+	
+		if select_date.empty? == false
+			select_string = select_string + " and (actualdate >= :date) "
+			date = select_date.scan(/(\d+)\/(\d+)\/(\d+)/).flatten
+			@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
+		end
+    	
+		select_string = select_string + " and ( "
+		i = 0
+		checked_brands.each do |checked_brand|
+			if i == 0
+				select_string = filter_select(select_string, checked_brand, Tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+			else
+				select_string = filter_select(select_string, checked_brand, Tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+			end
+			i += 1
+		end
+		select_string =  select_string + " ) "
+	end
+    	
+	if checked_ids.empty? == false
+		if checked_brands.empty? == false
+			select_string = select_string + " or ( "
+		else
+			select_string = select_string + " ( "
+		end
+		i = 0
+		checked_ids.each do |checked_id|
+				if i == 0
+					@bind_hash[("id" + i.to_s).to_sym] = checked_id
+					select_string = select_string + "id = :id" + i.to_s
+				else
+					@bind_hash[("id" + i.to_s).to_sym] = checked_id
+					select_string = select_string + " or id = :id" + i.to_s
+				end
+				i += 1
+			end
+			select_string =  select_string + " ) "
+		end
+		
+	all_data_array = []
+	select_all_data = db.execute(select_string, @bind_hash)
+	select_all_data.each do |one_row_data|
+		data_hash = {}
+		one_row_data.each_index do |index|
+			data_hash[Data_field[index]] = one_row_data[index]
+		end
+		all_data_array.push(data_hash)
+	end
+		
+	all_data_array.each_index do |all_data_array_index|
+		data_hash = all_data_array.at(all_data_array_index)
+		data_hash.each_pair do |data_hash_key, data_hash_value|
+			if data_hash_value.class == Float	
+	  			all_data_array[all_data_array_index][data_hash_key] = data_hash_value.round(2)
+	  		end		
+	  		if data_hash_key == 'moreflag' and data_hash_value == 1 
+	  			all_data_array[all_data_array_index]['remain'] = ">" + all_data_array[all_data_array_index]['remain'].to_s
+	  		end	 	
+	  		if data_hash_key == 'runflat'
+	  			if data_hash_value == 1
+	  				all_data_array[all_data_array_index][data_hash_key] = "Так"
+	  			else
+	  				all_data_array[all_data_array_index][data_hash_key] = "Ні"	
+	  			end	
+	  		end
+	  		if data_hash_key == 'season' 
+	  			all_data_array[all_data_array_index][data_hash_key] = Seasons[data_hash_value.to_i]
+	  		end	
+	  		if (data_hash_key == 'sp') and (all_data_array[all_data_array_index]['sp'] != 0 or all_data_array[all_data_array_index]['sp'] != "невідомо")
+	  			if data_hash['spc'] == "1"
+	  				all_data_array[all_data_array_index][data_hash_key] = all_data_array[all_data_array_index][data_hash_key].ceil.to_s + " грн."
+	  			elsif  data_hash['spc'] == "2"
+	 				all_data_array[all_data_array_index][data_hash_key] = (all_data_array[all_data_array_index][data_hash_key] + 0.0499999).round(1).to_s + " $"
+	  			elsif  data_hash['spc'] == "3"
+	  				all_data_array[all_data_array_index][data_hash_key] = (all_data_array[all_data_array_index][data_hash_key] + 0.0499999).round(1).to_s + " &euro;"
+	  			elsif  data_hash['spc'] == "4"
+	  				all_data_array[all_data_array_index][data_hash_key] = (all_data_array[all_data_array_index][data_hash_key] + 0.0499999).round(1).to_s + " PLN"
+	  			end
+	  		end
+	  		if (data_hash_key == 'sp') and (all_data_array[all_data_array_index]['sp'] == 0 or all_data_array[all_data_array_index]['sp'] == "невідомо")
+	  			all_data_array[all_data_array_index][data_hash_key] = "невідомо"	
+	  		end
+	  		if data_hash_key == 'productiondate'
+	  			if data_hash_value == nil
+	  				all_data_array[all_data_array_index][data_hash_key] = ""
+	  			else
+		  		production_date = all_data_array[all_data_array_index][data_hash_key].scan(/\d{2}(\d{2})\s+(\d{2})/).flatten
+		  		all_data_array[all_data_array_index][data_hash_key] = production_date[1].to_s + production_date[0].to_s
+		  		end
+		  	end
+	  		if data_hash_key == 'actualdate'
+		  		data_date = all_data_array[all_data_array_index][data_hash_key].scan(/(\d+)[-|\s+]/).flatten
+		  		all_data_array[all_data_array_index][data_hash_key] = data_date[2].to_s + "/" + data_date[1].to_s + "/" + data_date[0].to_s
+		  	end
+		  	if (data_hash_key == 'bp' or data_hash_key == 'bpvat' or data_hash_key == 'rpvat' or data_hash_key == 'rppe' or data_hash_key == 'rp') and (all_data_array[all_data_array_index]['sp'] != 0 or all_data_array[all_data_array_index]['sp'] != "невідомо")
+		  		all_data_array[all_data_array_index][data_hash_key ] = all_data_array[all_data_array_index][data_hash_key ].ceil.to_s + " грн."
+		  	end
+		  	if (data_hash_key == 'bp' or data_hash_key == 'bpvat' or data_hash_key == 'rpvat' or data_hash_key == 'rppe' or data_hash_key == 'rp') and (all_data_array[all_data_array_index]['sp'] == 0 or all_data_array[all_data_array_index]['sp'] == "невідомо")
+	  			all_data_array[all_data_array_index][data_hash_key] = "невідомо"		
+		  	end  		
+		end
+	end
+	
+
+	temp = Tempfile.new("vsikolesa.xls")
+	xls_file = Axlsx::Package.new
+	xls_file.workbook do |wb|
+	  # define your regular styles
+	  styles = wb.styles
+	  header = styles.add_style(:bg_color => '00CCFF', :b => true, :border => { :style => :thin, :color => "00" }, :alignment => { :horizontal => :center, :vertical => :center , :wrap_text => true})
+	  default = styles.add_style(:border => { :style => :thin, :color => "00" }, :alignment => { :horizontal => :left, :vertical => :center , :wrap_text => true})
+
+	  wb.add_worksheet(:name => 'price') do  |ws|
+		if admin?
+			protected!
+			ws.add_row [Table_Headers['brand'], Table_Headers['family'], Table_Headers['dimensiontype'], Table_Headers['sidewall'], Table_Headers['origin'], Table_Headers['runflat'], Table_Headers['productiondate'], Table_Headers['season'], Table_Headers['remain'], Table_Headers['supplier'], Table_Headers['suppliercomment'], Table_Headers['rp'], Table_Headers['bp'], Table_Headers['sp'], Table_Headers['bpvat'], Table_Headers['actualdate'], Table_Headers['sourcestring']], :style => header
+			all_data_array.each do |row_hash|
+				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'], row_hash['supplier'], row_hash['suppliercomment'], row_hash['rp'], row_hash['bp'], row_hash['sp'], row_hash['bpvat'], row_hash['actualdate'], row_hash['sourcestring']], :style => default  
+			end
+		else
+			ws.add_row [Table_Headers['brand'], Table_Headers['family'], Table_Headers['dimensiontype'], Table_Headers['sidewall'], Table_Headers['origin'], Table_Headers['runflat'], Table_Headers['productiondate'], Table_Headers['season'], Table_Headers['remain'],Table_Headers['suppliercomment'], Table_Headers['bp'], Table_Headers['bpvat'], Table_Headers['actualdate']], :style => header
+			all_data_array.each do |row_hash|
+				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['bp'], row_hash['bpvat'], row_hash['actualdate']], :style => default 
+			end
+		end 
+
+	  end
+	end
+	xls_file.serialize temp.path
+    send_file temp.path, :filename => "vsikolesa.xls", :type => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	
+end
+
 
 __END__
 
