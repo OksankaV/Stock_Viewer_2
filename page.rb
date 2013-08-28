@@ -23,51 +23,53 @@ helpers do
 	def protected! ; halt [ 401, 'Not Authorized' ] unless admin? ; end
 end
 
-if File.exists?("tyre.db")
-    db = SQLite3::Database.new("tyre.db")
-    Price_date = File.new("tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y о %R)")
-end
+p "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+
 
 Title = "Каталог шин"
 Table_Headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова ціна з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
-
-
-Tyre_providers = db.execute("select distinct supplier from price")
-Tyre_size = db.execute("select distinct sectionsize from price order by sectionsize asc").flatten
-
-Tyre_diameter = db.execute("select distinct diameterc from price order by diameterc asc").flatten
-Tyre_season = db.execute("select distinct season from price order by diameterc asc").flatten
+Data_field = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe']
+Show_data_field = ['id','brand', 'family', 'dimensiontype', 'sidewall', 'origin', 'runflat', 'productiondate', 'season', 'bp', 'remain', 'supplier', 'rp', 'sp', 'suppliercomment', 'bpvat', 'actualdate', 'sourcestring']
+Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'season' => 'Сезон', 'dimensiontype' => 'Типорозмір', 'bp' => 'Гуртова ціна', 'rp' => 'Роздрібна ціна'}
 Seasons = ["-", "літо", "зима", "в/c"]
 Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
 
-tyre_family_brand_name = db.execute("select distinct family, brand from price")
-
-
-tyre_family_brand = {}
-
-
-tyre_family_brand_name.each do |brand_family|
-	if !tyre_family_brand.has_key?(brand_family.last)
-		tyre_family_brand[brand_family.last] = []
+def select_data_from_db()
+	if File.exists?("data/tyre.db")
+		$db = SQLite3::Database.new("data/tyre.db")
+		$price_date_check = File.new("data/tyre.db").mtime
+		$price_date = File.new("data/tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y о %R)")
 	end
-        tyre_family_brand[brand_family.last].push(brand_family.first)
-end
-tyre_family = tyre_family_brand.values.flatten.uniq.sort
-Tyre_brand_name = tyre_family_brand.keys.sort
-Tyre_family_brand_name = tyre_family_brand
-Tyre_family_name = tyre_family
+	$tyre_providers = $db.execute("select distinct supplier from price")
+	$tyre_size = $db.execute("select distinct sectionsize from price order by sectionsize asc").flatten
+	$tyre_diameter = $db.execute("select distinct diameterc from price order by diameterc asc").flatten
+	$tyre_index = $db.execute("select distinct diameterc from price order by diameterc asc").flatten
+	$tyre_season = $db.execute("select distinct season from price order by diameterc asc").flatten
 
-Data_field = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe']
-Show_data_field = ['id','brand', 'family', 'dimensiontype', 'sidewall', 'origin', 'runflat', 'productiondate', 'season', 'bp', 'remain', 'supplier', 'rp', 'sp', 'suppliercomment', 'bpvat', 'actualdate', 'sourcestring']
-Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'season' => 'Сезон', 'dimensiontype' => 'Типорозмір', 'bp' => 'Гуртова ціна', 'rp' => 'Роздрібна ціна'}
+	tyre_family_brand_name = $db.execute("select distinct family, brand from price")
 
-    Tyre_family_brand_name.each_pair do |brand,families|
-    	Tyre_family_brand_name[brand] = []
-		families.each do |one_family|
-			Tyre_family_brand_name[brand].push(one_family)
+	tyre_family_brand = {}
+	tyre_family_brand_name.each do |brand_family|
+		if !tyre_family_brand.has_key?(brand_family.last)
+			tyre_family_brand[brand_family.last] = []
 		end
-    end
+		    tyre_family_brand[brand_family.last].push(brand_family.first)
+	end
+	tyre_family = tyre_family_brand.values.flatten.uniq.sort
+	$tyre_brand_name = tyre_family_brand.keys.sort
+	p "----"
+	p $tyre_brand_name
+	$tyre_family_brand_name = tyre_family_brand
+	$tyre_family_name = tyre_family
+	$tyre_family_brand_name.each_pair do |brand,families|
+		$tyre_family_brand_name[brand] = []
+		families.each do |one_family|
+			$tyre_family_brand_name[brand].push(one_family)
+		end
+	end
+	 
+end
 
 def select_values(param_select_values,new_param_value,db_array)
     if param_select_values == nil
@@ -107,8 +109,12 @@ def make_href(select_value,param_name,param_array_name)
 	end	
 end
 
+select_data_from_db()
 
 get '/' do
+	if (File.new("data/tyre.db").mtime != $price_date_check)
+		select_data_from_db()
+	end
     @message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"
     @message_no_data = "Немає даних, що відповідають вибраним значенням"
     if params[:press_reset_button] == "true"
@@ -120,17 +126,17 @@ get '/' do
 		@select_date = ""
 		@select_remain = ""
     else	
-		@select_brands = select_values(params[:tyre_brand_selected],params[:tyre_brand_typeahead],Tyre_brand_name)
-		@select_families = select_values(params[:tyre_family_selected],params[:tyre_family_typeahead],Tyre_family_name)
-		@select_sizes = select_values(params[:tyre_size_selected],params[:tyre_size_typeahead],Tyre_size)
-		@select_diameters = select_values(params[:tyre_diameter_selected],params[:tyre_diameter_typeahead],Tyre_diameter)
+		@select_brands = select_values(params[:tyre_brand_selected],params[:tyre_brand_typeahead],$tyre_brand_name)
+		@select_families = select_values(params[:tyre_family_selected],params[:tyre_family_typeahead],$tyre_family_name)
+		@select_sizes = select_values(params[:tyre_size_selected],params[:tyre_size_typeahead],$tyre_size)
+		@select_diameters = select_values(params[:tyre_diameter_selected],params[:tyre_diameter_typeahead],$tyre_diameter)
 		#if params[:tyre_season_selected] != nil
 		#	select_seasons = []
 		#	params[:tyre_season_selected].each do |value|
 		#		select_seasons.push(Seasons.index(value).to_s)
 		#	end
 		#end
-		@select_seasons = select_values(params[:tyre_season_selected],"",Tyre_season)
+		@select_seasons = select_values(params[:tyre_season_selected],"",$tyre_season)
 
 		if params[:tyre_date_selected] == nil
 			@select_date = ""
@@ -170,10 +176,10 @@ get '/' do
 
 	tyre_family_help_array = [] 
     if @select_brands.empty?
-		tyre_family_help_array = Tyre_family_name
+		tyre_family_help_array = $tyre_family_name
 	else	
 		help_array = []
-		Tyre_family_brand_name.each_pair do |brand,brand_families|
+		$tyre_family_brand_name.each_pair do |brand,brand_families|
 			if @select_brands.include?(brand)
 				brand_families.each do |one_family|
 					tyre_family_help_array.push(one_family)
@@ -215,9 +221,9 @@ get '/' do
 			i=0
 			@select_sizes.each do |tyre_sizes_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
+					select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+					select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
 				end
 				i += 1
 			end
@@ -228,9 +234,9 @@ get '/' do
 				i=0
 				@select_brands.each do |tyre_brands_check|
 					if i == 0
-						select_string = filter_select(select_string, tyre_brands_check, Tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+						select_string = filter_select(select_string, tyre_brands_check, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
 					else
-						select_string = filter_select(select_string, tyre_brands_check, Tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+						select_string = filter_select(select_string, tyre_brands_check, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
 					end
 					i += 1
 				end
@@ -241,9 +247,9 @@ get '/' do
 				i=0
 				@select_families.each do |tyre_families_check|
 					if i == 0
-						select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
+						select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
 					else
-						select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
+						select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
 					end
 					i += 1
 				end
@@ -254,9 +260,9 @@ get '/' do
 				i=0
 				@select_diameters.each do |tyre_diameters_check|
 					if i == 0
-						select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+						select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 					else
-						select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+						select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 					end
 					i += 1
 				end
@@ -267,13 +273,13 @@ get '/' do
 				i=0
 				@select_seasons.each do |tyre_seasons_check|
 					if i == 0
-						select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
+						select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
 					else
-						select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+						select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 					end
 					i += 1
 				end
-				select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+				select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 				select_string =  select_string + " ) "
 			end
 	
@@ -290,7 +296,7 @@ get '/' do
 	
 			select_string = select_string + "group by brand order by brand"
 
-			select_brand_price_array = db.execute(select_string, @bind_hash)
+			select_brand_price_array = $db.execute(select_string, @bind_hash)
 	
 			@select_brand_price_hash = {}
 			select_brand_price_array.each do |brand_price_array|
@@ -338,9 +344,9 @@ get '/table' do
 	i=0
 	select_sizes.each do |tyre_sizes_check|
 		if i == 0
-			select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
+			select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
 		else
-			select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+			select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
 		end
 		i += 1
 	end
@@ -351,9 +357,9 @@ get '/table' do
 		i=0
 		select_brands.each do |tyre_brands_check|
 			if i == 0
-				select_string = filter_select(select_string, tyre_brands_check, Tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+				select_string = filter_select(select_string, tyre_brands_check, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
 			else
-				select_string = filter_select(select_string, tyre_brands_check, Tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+				select_string = filter_select(select_string, tyre_brands_check, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
 			end
 			i += 1
 		end
@@ -364,9 +370,9 @@ get '/table' do
 		i=0
 		select_families.each do |tyre_families_check|
 			if i == 0
-				select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
+				select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
 			else
-				select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
+				select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
 			end
 			i += 1
 		end
@@ -377,9 +383,9 @@ get '/table' do
 		i=0
 		select_diameters.each do |tyre_diameters_check|
 			if i == 0
-				select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+				select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 			else
-				select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+				select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 			end
 			i += 1
 		end
@@ -390,13 +396,13 @@ get '/table' do
 		i=0
 		select_seasons.each do |tyre_seasons_check|
 			if i == 0
-				select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
+				select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
 			else
-				select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+				select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 			end
 			i += 1
 		end
-		select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+		select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 		select_string =  select_string + " ) "
 	end
 	
@@ -414,7 +420,7 @@ get '/table' do
 	
 	all_data_array = []
 	show_data_array = []
-	select_all_data = db.execute(select_string, @bind_hash)
+	select_all_data = $db.execute(select_string, @bind_hash)
 	select_all_data.each do |one_row_data|
 		data_hash = {}
 		show_data_hash = {}
@@ -567,9 +573,9 @@ post '/table_selected_items' do
 		i=0
 		select_sizes.each do |tyre_sizes_check|
 			if i == 0
-				select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
+				select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
 			else
-				select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+				select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
 			end
 			i += 1
 		end
@@ -580,9 +586,9 @@ post '/table_selected_items' do
 			i=0
 			select_families.each do |tyre_families_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
+					select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
+					select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
 				end
 				i += 1
 			end
@@ -593,9 +599,9 @@ post '/table_selected_items' do
 			i=0
 			select_diameters.each do |tyre_diameters_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+					select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+					select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 				end
 				i += 1
 			end
@@ -606,13 +612,13 @@ post '/table_selected_items' do
 			i=0
 			select_seasons.each do |tyre_seasons_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
+					select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+					select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 				end
 				i += 1
 			end
-			select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+			select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 			select_string =  select_string + " ) "
 		end
 	
@@ -632,9 +638,9 @@ post '/table_selected_items' do
 		i = 0
 		@checked_brand_array.each do |checked_brand|
 			if i == 0
-				select_string = filter_select(select_string, checked_brand, Tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
 			else
-				select_string = filter_select(select_string, checked_brand, Tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
 			end
 			i += 1
 		end
@@ -663,14 +669,14 @@ post '/table_selected_items' do
 
 	select_count = select_string.gsub(/\*/,"count(*)")
 	
-	rows_count = db.execute(select_count, @bind_hash).flatten
+	rows_count = $db.execute(select_count, @bind_hash).flatten
 
 	@select_string_to_excel = select_string
 	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i.to_i
 	select_string = select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
 		
 	all_data_array = []
-	select_all_data = db.execute(select_string, @bind_hash)
+	select_all_data = $db.execute(select_string, @bind_hash)
 	select_all_data.each do |one_row_data|
 		data_hash = {}
 		one_row_data.each_index do |index|
@@ -752,14 +758,14 @@ end
 get '/models' do
     @families = {}
     if params[:tyre_brand] == nil
-        tyre_brands = Tyre_brand_name
+        tyre_brands = $tyre_brand_name
     elsif params[:tyre_brand].empty? 
-    	tyre_brands = Tyre_brand_name
+    	tyre_brands = $tyre_brand_name
     else	
     	tyre_brands = params[:tyre_brand]
     end
     tyre_brands.each do |tyre_brand|
-        @families[tyre_brand] = db.execute("select family,brand from price where brand=?", tyre_brand).flatten
+        @families[tyre_brand] = $db.execute("select family,brand from price where brand=?", tyre_brand).flatten
     end	
     @bind_hash = {}
     
@@ -775,7 +781,7 @@ get '/models' do
 	end
 	select_family =  select_string + " ) "
 	
-    families_brands = db.execute(select_family, @bind_hash)
+    families_brands = $db.execute(select_family, @bind_hash)
    
     
     erb :models
@@ -852,9 +858,9 @@ post '/excel_file' do
 		i=0
 		select_sizes.each do |tyre_sizes_check|
 			if i == 0
-				select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
+				select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
 			else
-				select_string = filter_select(select_string, tyre_sizes_check, Tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+				select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
 			end
 			i += 1
 		end
@@ -865,9 +871,9 @@ post '/excel_file' do
 			i=0
 			select_families.each do |tyre_families_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
+					select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_families_check, Tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
+					select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
 				end
 				i += 1
 			end
@@ -878,9 +884,9 @@ post '/excel_file' do
 			i=0
 			select_diameters.each do |tyre_diameters_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+					select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_diameters_check, Tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+					select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
 				end
 				i += 1
 			end
@@ -891,13 +897,13 @@ post '/excel_file' do
 			i=0
 			select_seasons.each do |tyre_seasons_check|
 				if i == 0
-					select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
+					select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
 				else
-					select_string = filter_select(select_string, tyre_seasons_check, Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+					select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 				end
 				i += 1
 			end
-			select_string = filter_select(select_string, "0", Tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+			select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 			select_string =  select_string + " ) "
 		end
 	
@@ -917,9 +923,9 @@ post '/excel_file' do
 		i = 0
 		checked_brands.each do |checked_brand|
 			if i == 0
-				select_string = filter_select(select_string, checked_brand, Tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
 			else
-				select_string = filter_select(select_string, checked_brand, Tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
 			end
 			i += 1
 		end
@@ -947,7 +953,7 @@ post '/excel_file' do
 		end
 		
 	all_data_array = []
-	select_all_data = db.execute(select_string, @bind_hash)
+	select_all_data = $db.execute(select_string, @bind_hash)
 	select_all_data.each do |one_row_data|
 		data_hash = {}
 		one_row_data.each_index do |index|

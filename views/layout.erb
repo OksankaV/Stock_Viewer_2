@@ -16,6 +16,15 @@
 		<script type="text/javascript" src="/bootstrap_datepicker/js/bootstrap-datepicker.js"></script>
 		<script type="text/javascript" src="/bootstrap_datepicker/js/locales/bootstrap-datepicker.uk.js" charset="UTF-8"></script>
 		
+		<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			ga('create', 'UA-41818988-1', 'vsikolesa.com');
+			ga('send', 'pageview');
+		</script>
+		
 		<script type="text/javascript">
 		$(document).ready(function() {
 			var navbar = $(".navbar").outerHeight(true) + 10;
@@ -26,6 +35,9 @@
    		body {
 			font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
 			font-size: 12px;
+    	}
+    	.price_link {
+			font-weight: bold;
     	}
 		.brand {text-transform: uppercase;}
 		</style>
@@ -39,8 +51,16 @@
 					<a class="brand" href="/">vsikolesa</a>
 					<div class="pull-left">
 						<ul class="nav">
-							<li><a href='/'>Каталог шин</a></li>
-							<li><p class="navbar-text"><%=Price_date%></p></li>
+							<li><a href='/' class="price_link">Каталог шин</a></li>
+							<li><p class="navbar-text"><%=$price_date%></p></li>
+							
+							<li class="dropdown">
+				              <a id="dropdown_download_price" href="#" role="button" class="dropdown-toggle price_link" data-toggle="dropdown">Скачати прайс<b class="caret"></b></a>
+				              <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown_download_price">
+				                <li role="presentation"><a role="menuitem" tabindex="-1" href="http://yadi.sk/d/fYEiCQeQ7T35d" target="_blank">Старий формат (XLS)</a></li>
+								<li role="presentation"><a role="menuitem" tabindex="-1" href="http://yadi.sk/d/NTIOrte-7T31x" target="_blank">Новий формат (XLSX)</a></li>
+				              </ul>
+				            </li>
 						</ul>	
 					</div>
 					<div class="pull-right">

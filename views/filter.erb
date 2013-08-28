@@ -3,7 +3,7 @@
 	$(document).ready(function() {
 
 		$('#tyre_brand_typeahead').typeahead({
-			source: <%=Tyre_brand_name.to_json%>,
+			source: <%=$tyre_brand_name.to_json%>,
 			items: 20,
 			updater: function(item){
 				add_to_filter('brand',item); 
@@ -22,7 +22,7 @@
 		});
 
 		$('#tyre_size_typeahead').typeahead({
-			source: <%=Tyre_size.to_json%>,
+			source: <%=$tyre_size.to_json%>,
 			items: 20,
 			updater: function(item) {
 				add_to_filter('size',item);
@@ -31,7 +31,7 @@
 		});
 
 		$('#tyre_diameter_typeahead').typeahead({
-			source: <%=Tyre_diameter.to_json%>,
+			source: <%=$tyre_diameter.to_json%>,
 			items: 20,
 			updater: function(item) {
 				add_to_filter('diameter',item);
@@ -295,7 +295,8 @@
 			);
 		}  
 
-		function add_to_filter(id_part,value,season_index_name=[]){  
+		function add_to_filter(id_part,value,season_index_name){  
+		
 			if (id_part != "season")
 				$('input[id="tyre_' + id_part + '_typeahead"]').attr("value",value);
 			
@@ -356,7 +357,7 @@
 				$("#tyre_size_typeahead").focus();
 		}
 
-		function remove_selected(remove_name,id_part,season_name=""){	
+		function remove_selected(remove_name,id_part,season_name){	
 			$('div[id="' + remove_name + '"]').remove();
 			if (id_part == 'season')
 				$('button[id="'+season_name+'"]').removeAttr('style');
@@ -486,20 +487,15 @@
 		
 		#select_items_form{background-color: #FFFFFF;}
 		
-		
-		.season_group {
-			width: 25%;
-			padding-left: 21px;
-			padding-right: 21px;
-		}
-		
 		.image_size {
 			height: 19px;
+			width: 19px;
 			overflow: auto;
 		}
 		
 		.image_size_filter {
 			height: 16px;
+			width: 16px;
 			overflow: auto;
 		}
 		
@@ -678,13 +674,11 @@
 			</div>
 	
 			<div class="span3">
-				<div class="row-fluid">
-				<div class="input-append date" id="datepicker"  data-date-format="dd/mm/yyyy">
-					<input id="tyre_date_typeahead" name="tyre_date_typeahead" class="span19" type="text" placeholder="Оберіть дату..." autocomplete="off" style="font-size: 12px;">
-					<div class="add-on showDate">
+				<div class="row-fluid input-append date" id="datepicker"  data-date-format="dd/mm/yyyy">
+						<input id="tyre_date_typeahead" name="tyre_date_typeahead" class="input-block-level span19" type="text" placeholder="Оберіть дату..." autocomplete="off" style="font-size: 12px;" readonly>
+					<div class="add-on">
 						<div align="center"><i class="icon-calendar"></i></div>	
 					</div>
-				</div>
 				</div>
 			</div>	
 		</div>
