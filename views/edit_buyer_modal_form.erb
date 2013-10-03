@@ -1,0 +1,15 @@
+		<form id="edit_buyer_form" action="/edit_buyer" method="post">  
+			<input name="edit_item" type="hidden" value="<%=@edit_item%>">    
+			<div class="row-fluid">   
+				<div class="span24">
+					<label for="edit_name"><%=Orders_table_headers['buyer']%></label>
+					<input type="text" id="edit_name" name="edit_name" class="span24" value="<%=@edit_data_hash['buyer']%>">  
+				</div>
+			</div>
+			<div class="row-fluid">
+				<div class="span24">
+					<label><%=Orders_table_headers['notes']%></label>
+					<textarea id="edit_notes" name="edit_notes" class="span24" rows="2"><%=@edit_data_hash['notes']%></textarea>
+				</div>
+			</div>
+		</form>

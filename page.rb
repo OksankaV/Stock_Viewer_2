@@ -23,17 +23,20 @@ helpers do
 	def protected! ; halt [ 401, 'Not Authorized' ] unless admin? ; end
 end
 
-p "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
 
-
-Title = "Каталог шин"
-Table_Headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова ціна з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
-Data_field = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe']
+Title = "VSIKOLESA"
+Price_table_headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова ціна з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
+Price_table_columns = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe']
 Show_data_field = ['id','brand', 'family', 'dimensiontype', 'sidewall', 'origin', 'runflat', 'productiondate', 'season', 'bp', 'remain', 'supplier', 'rp', 'sp', 'suppliercomment', 'bpvat', 'actualdate', 'sourcestring']
 Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'season' => 'Сезон', 'dimensiontype' => 'Типорозмір', 'bp' => 'Гуртова ціна', 'rp' => 'Роздрібна ціна'}
 Seasons = ["-", "літо", "зима", "в/c"]
 Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
+Orders_table_headers = {'issued' =>'Дата введення','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна','rate' => 'Курс', 'outprice' => 'Вихідна ціна', 'transfered' => 'Переказано', 'transferprice' => 'Ціна доставки', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Дата відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'notes' => 'Нотатки'}
+Buyers_table_headers = {'buyer' =>'Покупець', 'notes' => 'Нотатки'}
+Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'notes']
+Buyers_table_columns = ['buyer','notes']
+Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
 def select_data_from_db()
 	if File.exists?("data/tyre.db")
@@ -41,13 +44,13 @@ def select_data_from_db()
 		$price_date_check = File.new("data/tyre.db").mtime
 		$price_date = File.new("data/tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y о %R)")
 	end
-	$tyre_providers = $db.execute("select distinct supplier from price")
-	$tyre_size = $db.execute("select distinct sectionsize from price order by sectionsize asc").flatten
-	$tyre_diameter = $db.execute("select distinct diameterc from price order by diameterc asc").flatten
-	$tyre_index = $db.execute("select distinct diameterc from price order by diameterc asc").flatten
-	$tyre_season = $db.execute("select distinct season from price order by diameterc asc").flatten
+	$tyre_providers = $db.execute("SELECT DISTINCT supplier FROM price")
+	$tyre_size = $db.execute("SELECT DISTINCT sectionsize FROM price ORDER BY sectionsize ASC").flatten
+	$tyre_diameter = $db.execute("SELECT DISTINCT diameterc FROM price ORDER BY diameterc ASC").flatten
+	$tyre_index = $db.execute("SELECT DISTINCT diameterc FROM price ORDER BY diameterc ASC").flatten
+	$tyre_season = $db.execute("SELECT DISTINCT season FROM price ORDER BY diameterc ASC").flatten
 
-	tyre_family_brand_name = $db.execute("select distinct family, brand from price")
+	tyre_family_brand_name = $db.execute("SELECT DISTINCT family, brand FROM price")
 
 	tyre_family_brand = {}
 	tyre_family_brand_name.each do |brand_family|
@@ -58,8 +61,6 @@ def select_data_from_db()
 	end
 	tyre_family = tyre_family_brand.values.flatten.uniq.sort
 	$tyre_brand_name = tyre_family_brand.keys.sort
-	p "----"
-	p $tyre_brand_name
 	$tyre_family_brand_name = tyre_family_brand
 	$tyre_family_name = tyre_family
 	$tyre_family_brand_name.each_pair do |brand,families|
@@ -67,8 +68,14 @@ def select_data_from_db()
 		families.each do |one_family|
 			$tyre_family_brand_name[brand].push(one_family)
 		end
-	end
-	 
+	end 
+end
+
+def select_data_from_orders_db()
+	if File.exists?("orders.db")
+		$db_orders = SQLite3::Database.new("orders.db")
+		$db_orders.execute("PRAGMA foreign_keys = ON;")
+	end	
 end
 
 def select_values(param_select_values,new_param_value,db_array)
@@ -294,7 +301,7 @@ get '/' do
 				@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
 			end
 	
-			select_string = select_string + "group by brand order by brand"
+			select_string = select_string + "GROUP BY brand ORDER BY brand"
 
 			select_brand_price_array = $db.execute(select_string, @bind_hash)
 	
@@ -425,9 +432,9 @@ get '/table' do
 		data_hash = {}
 		show_data_hash = {}
 		one_row_data.each_index do |index|
-			data_hash[Data_field[index]] = one_row_data[index]
-			if Header_data_field.has_key?(Data_field[index])
-				show_data_hash[Data_field[index]] = one_row_data[index]
+			data_hash[Price_table_columns[index]] = one_row_data[index]
+			if Header_data_field.has_key?(Price_table_columns[index])
+				show_data_hash[Price_table_columns[index]] = one_row_data[index]
 			end
 		end
 		all_data_array.push(data_hash)
@@ -680,7 +687,7 @@ post '/table_selected_items' do
 	select_all_data.each do |one_row_data|
 		data_hash = {}
 		one_row_data.each_index do |index|
-			data_hash[Data_field[index]] = one_row_data[index]
+			data_hash[Price_table_columns[index]] = one_row_data[index]
 		end
 		all_data_array.push(data_hash)
 	end
@@ -765,11 +772,11 @@ get '/models' do
     	tyre_brands = params[:tyre_brand]
     end
     tyre_brands.each do |tyre_brand|
-        @families[tyre_brand] = $db.execute("select family,brand from price where brand=?", tyre_brand).flatten
+        @families[tyre_brand] = $db.execute("SELECT family,brand FROM price WHERE brand=?", tyre_brand).flatten
     end	
     @bind_hash = {}
     
-    select_family = "select family from price where "
+    select_family = "SELECT family FROM price WHERE "
 	i=0
 	tyre_brands.each do |tyre_brand|
 		if i == 0
@@ -957,7 +964,7 @@ post '/excel_file' do
 	select_all_data.each do |one_row_data|
 		data_hash = {}
 		one_row_data.each_index do |index|
-			data_hash[Data_field[index]] = one_row_data[index]
+			data_hash[Price_table_columns[index]] = one_row_data[index]
 		end
 		all_data_array.push(data_hash)
 	end
@@ -1028,12 +1035,12 @@ post '/excel_file' do
 	  wb.add_worksheet(:name => 'price') do  |ws|
 		if admin?
 			protected!
-			ws.add_row [Table_Headers['brand'], Table_Headers['family'], Table_Headers['dimensiontype'], Table_Headers['sidewall'], Table_Headers['origin'], Table_Headers['runflat'], Table_Headers['productiondate'], Table_Headers['season'], Table_Headers['remain'], Table_Headers['supplier'], Table_Headers['suppliercomment'], Table_Headers['rp'], Table_Headers['bp'], Table_Headers['sp'], Table_Headers['bpvat'], Table_Headers['actualdate'], Table_Headers['sourcestring']], :style => header
+			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'], Price_table_headers['supplier'], Price_table_headers['suppliercomment'], Price_table_headers['rp'], Price_table_headers['bp'], Price_table_headers['sp'], Price_table_headers['bpvat'], Price_table_headers['actualdate'], Price_table_headers['sourcestring']], :style => header
 			all_data_array.each do |row_hash|
 				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'], row_hash['supplier'], row_hash['suppliercomment'], row_hash['rp'], row_hash['bp'], row_hash['sp'], row_hash['bpvat'], row_hash['actualdate'], row_hash['sourcestring']], :style => default  
 			end
 		else
-			ws.add_row [Table_Headers['brand'], Table_Headers['family'], Table_Headers['dimensiontype'], Table_Headers['sidewall'], Table_Headers['origin'], Table_Headers['runflat'], Table_Headers['productiondate'], Table_Headers['season'], Table_Headers['remain'],Table_Headers['suppliercomment'], Table_Headers['bp'], Table_Headers['bpvat'], Table_Headers['actualdate']], :style => header
+			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['bp'], Price_table_headers['bpvat'], Price_table_headers['actualdate']], :style => header
 			all_data_array.each do |row_hash|
 				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['bp'], row_hash['bpvat'], row_hash['actualdate']], :style => default 
 			end
@@ -1046,6 +1053,295 @@ post '/excel_file' do
 	
 end
 
+get '/orders' do
+	if admin?
+		protected!
+		select_data_from_orders_db()
+		@count = $db_orders.execute("SELECT count(*) FROM orders").flatten.first
+		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
+		if params[:show_modal] == nil
+			@show_modal = ""
+		else
+			@show_modal = params[:show_modal]
+		end	
+		if params[:buyer_name] == nil
+			@buyer_name = ""
+		else
+			@buyer_name = params[:buyer_name]
+		end
+		if params[:edit_item] == nil
+			@edit_item = ""
+		else
+			@edit_item = params[:edit_item].gsub!(/row/,'')
+		end
+		erb :orders 
+	end	
+end 
+
+post '/orders_table' do
+	if admin?
+		protected!
+		sortname_column = params[:sortname]
+		sortorder_value = params[:sortorder]
+		sortname_column = params[:sortname]
+		rp_number = params[:rp]
+		page_number = params[:page]
+		sortorder_value = params[:sortorder]
+		
+		
+		all_orders_array = []
+		orders_count = $db_orders.execute("SELECT count(*) FROM orders")
+		select_all_orders = $db_orders.execute("SELECT orders.*, buyers.notes FROM orders, buyers WHERE orders.buyer=buyers.name")
+		
+		select_all_orders.each do |one_row_data|
+			data_hash = {}
+			one_row_data.each_index do |index|
+				data_hash[Orders_table_columns[index]] = one_row_data[index]
+			end
+			all_orders_array.push(data_hash)
+		end
+		
+		all_orders_array.each_index do |all_orders_array_index|
+			orders_hash = all_orders_array.at(all_orders_array_index)
+			orders_hash.each_pair do |orders_hash_key, orders_hash_value|	
+		  		if orders_hash_key == 'payed_by_buyer' or orders_hash_key == 'payed_by_us' or orders_hash_key == 'cash_flag'
+		  			if orders_hash_value == 1
+		  				all_orders_array[all_orders_array_index][orders_hash_key] = "Так"
+		  			else
+		  				all_orders_array[all_orders_array_index][orders_hash_key] = "Ні"	
+		  			end	
+		  		end
+		  		if orders_hash_key == 'status'
+		  			all_orders_array[all_orders_array_index][orders_hash_key] = Status_values_array[orders_hash_value.to_i]
+		  		end	
+			end
+		end
+
+		select_data = {}
+		rows_array = []
+
+		all_orders_array.each do |value_hash|
+			rows_array.push({"id" => value_hash["id"], "cell" => value_hash})
+		end
+		select_data["page"] = page_number
+		select_data["total"] = orders_count
+		select_data["rows"] = rows_array
+		select_data["post"] = []
+
+		return (JSON.pretty_generate(select_data))
+	end	
+end
+
+get '/delete_orders' do
+	if admin?
+		protected!
+		delete_array= []
+		params[:items].each do |item|
+			delete_array.push(item.gsub!(/row/,''))
+		end
+		@bind_hash = {}
+		delete_select_string = 'DELETE FROM orders WHERE'
+		delete_array.each_index do |array_index|
+			if (array_index == 0)
+				delete_select_string += " id=:id" + array_index.to_s
+				@bind_hash[("id" + array_index.to_s).to_sym] = delete_array[array_index].to_i
+			else
+				delete_select_string += " or id=:id" + array_index.to_s
+				@bind_hash[("id" + array_index.to_s).to_sym] = delete_array[array_index].to_i
+			end
+		end
+		$db_orders.execute(delete_select_string, @bind_hash)
+		redirect('/orders')
+	end
+end
+
+get '/edit_modal_form' do
+	if admin?
+		protected!
+		@edit_item = params[:item]
+		@edit_item.gsub!(/row/,'')
+
+		select_edit_row = $db_orders.execute("SELECT * FROM orders WHERE id=?", [@edit_item]).flatten
+		@edit_data_hash = {}
+		select_edit_row.each_index do |index|
+			@edit_data_hash[Orders_table_columns[index]] = select_edit_row[index]
+		end
+		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
+		erb :edit_modal_form, :layout => false
+	end	
+end
+
+def boolean_hash_check(hash,check)
+	if hash.has_key?(check)
+		return 1
+	else
+		return 0	
+	end
+end		
+
+post '/edit_order' do
+	if admin?
+		protected!
+		input_params_hash = {}
+		params.each_pair do |input_param_key, input_param_value|
+			param_key = input_param_key.gsub(/edit_/,"").to_sym
+			if (param_key == :transfered) || (param_key == :transferprice) || (param_key == :status)|| (param_key == :id)
+				input_params_hash[param_key] = input_param_value.to_i
+			else
+				input_params_hash[param_key] = input_param_value
+			end	
+			input_params_hash[param_key] = "" if input_param_value == nil
+		end
+		input_params_hash[:issued] = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+		input_params_hash[:payed_by_buyer] = boolean_hash_check(params,"input_payed_by_buyer")
+		input_params_hash[:payed_by_us] = boolean_hash_check(params,"input_payed_by_us")
+		input_params_hash[:cash_flag] = boolean_hash_check(params,"input_cash_flag")
+
+		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id, cash_flag=:cash_flag WHERE id=:id", input_params_hash)
+		redirect('/orders')
+	end
+end
+
+post '/add_new_order' do
+	if admin?
+		protected!
+		input_params_hash = {}
+		params.each_pair do |input_param_key, input_param_value|
+			input_params_hash[input_param_key] = input_param_value
+			input_params_hash[input_param_key] = "" if input_param_value == nil
+		end
+		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, rate, outprice, transfered, transferprice, payed_by_buyer, payed_by_us, status, bank, sent, track_id, cash_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d %H:%M:%S"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"], input_params_hash["input_rate"], input_params_hash["input_outprice"], input_params_hash["input_transfered"].to_i, input_params_hash["input_transferprice"].to_i, input_params_hash["input_payed_by_buyer"], input_params_hash["input_payed_by_us"], input_params_hash["input_status"], input_params_hash["input_bank"], input_params_hash["input_sent"],input_params_hash["input_track_id"],input_params_hash["input_cash_flag"]])
+		redirect('/orders')
+	end
+end
+
+post '/add_new_buyer' do
+	if admin?
+		protected!
+		input_params_hash = {}
+		params.each_pair do |input_param_key, input_param_value|
+			input_params_hash[input_param_key] = input_param_value
+			input_params_hash[input_param_key] = "" if input_param_value == nil
+		end
+		$db_orders.execute("INSERT INTO buyers(name, notes) VALUES (?,?)", [input_params_hash["input_buyer"],input_params_hash["input_notes"]])
+		
+		if input_params_hash['shown_modal'] == nil or input_params_hash['shown_modal'] == ""
+			redirect('/buyers')
+		else 	
+			redirect(URI.escape('/orders?show_modal=' + input_params_hash['shown_modal'] + '&edit_item=' + input_params_hash["edit_item"] + '&buyer_name=' + input_params_hash["input_buyer"]))
+		end	
+	end
+end
+
+get '/buyers' do
+	if admin?
+		protected!
+		select_data_from_orders_db()
+		@count = $db_orders.execute("SELECT count(*) FROM buyers").flatten.first
+		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
+		buyers_from_orders_table = $db_orders.execute("SELECT distinct buyer FROM orders").flatten
+		@buyers_from_orders_table = []
+		buyers_from_orders_table.each do |buyer|
+			@buyers_from_orders_table.push('row' + buyer)
+		end
+		erb :buyers
+	end	
+	
+end
+
+post '/buyers_table' do
+	if admin?
+		protected!
+		sortname_column = params[:sortname]
+		sortorder_value = params[:sortorder]
+		sortname_column = params[:sortname]
+		rp_number = params[:rp]
+		page_number = params[:page]
+		sortorder_value = params[:sortorder]
+		
+		
+		all_buyers_array = []
+		buyers_count = $db_orders.execute("SELECT count(*) FROM buyers")
+		select_all_buyers = $db_orders.execute("SELECT * FROM buyers")
+		
+		select_all_buyers.each do |one_row_data|
+			data_hash = {}
+			one_row_data.each_index do |index|
+				data_hash[Buyers_table_columns[index]] = one_row_data[index]
+			end
+			all_buyers_array.push(data_hash)
+		end
+
+		select_data = {}
+		rows_array = []
+
+		all_buyers_array.each do |value_hash|
+			rows_array.push({"id" => value_hash["buyer"], "cell" => value_hash})
+		end
+		
+		select_data["page"] = page_number
+		select_data["total"] = buyers_count
+		select_data["rows"] = rows_array
+		select_data["post"] = []
+
+		return (JSON.pretty_generate(select_data))
+	end
+end
+
+
+get '/delete_buyers' do
+	if admin?
+		protected!
+		delete_array= []
+		params[:items].each do |item|
+			delete_array.push(item.gsub!(/row/,''))
+		end
+		@bind_hash = {}
+		delete_select_string = 'DELETE FROM buyers WHERE'
+		delete_array.each_index do |array_index|
+			if (array_index == 0)
+				delete_select_string += " name=:name" + array_index.to_s
+				@bind_hash[("name" + array_index.to_s).to_sym] = delete_array[array_index]
+			else
+				delete_select_string += " or name=:name" + array_index.to_s
+				@bind_hash[("name" + array_index.to_s).to_sym] = delete_array[array_index]
+			end
+		end
+		$db_orders.execute(delete_select_string, @bind_hash)
+		redirect('/buyers')
+	end	
+end
+
+
+get '/edit_buyer_modal_form' do
+	if admin?
+		protected!
+		@edit_item = params[:item]
+		@edit_item.gsub!(/row/,'')
+
+		select_edit_row = $db_orders.execute("SELECT * FROM buyers WHERE name=?", [@edit_item]).flatten
+		@edit_data_hash = {}
+		select_edit_row.each_index do |index|
+			@edit_data_hash[Buyers_table_columns[index]] = select_edit_row[index]
+		end
+		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
+		erb :edit_buyer_modal_form, :layout => false
+	end	
+end
+
+post '/edit_buyer' do
+	if admin?
+		protected!
+		input_params_hash = {}
+		params.each_pair do |input_param_key, input_param_value|
+			param_key = input_param_key.gsub(/edit_/,"").to_sym
+			input_params_hash[param_key] = input_param_value
+			input_params_hash[param_key] = "" if input_param_value == nil
+		end
+		$db_orders.execute("UPDATE buyers SET name=:name, notes=:notes WHERE name=:item", input_params_hash)
+		redirect('/buyers')
+	end
+end
 
 __END__
 
@@ -1060,7 +1356,6 @@ __END__
 			</div>
 		</div>
 	<%end%>
-			
 
 
 

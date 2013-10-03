@@ -6,24 +6,24 @@
 					url: '/table_selected_items',
 					dataType: "json",
 					colModel : [
-						{display: "<%=Table_Headers['brand']%>", name : 'brand', width : 100, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['family']%>", name : 'family', width : 150, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['dimensiontype']%>", name : 'dimensiontype', width : 130, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['sidewall']%>", name : 'sidewall', width : 60, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['origin']%>", name : 'origin', width : 55, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['runflat']%>", name : 'runflat', width : 50, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['productiondate']%>", name : 'productiondate', width : 40, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['season']%>", name : 'season', width : 40, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['remain']%>", name : 'remain', width : 50, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: "<%=Table_Headers['supplier']%>", name : 'supplier', width : 55, sortable : true, align: 'left'},<%end%>
-						{display: "<%=Table_Headers['suppliercomment']%>", name : 'suppliercomment', width : 85, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: "<%=Table_Headers['rp']%>", name : 'rp', width : 80, sortable : true, align: 'left'},<%end%>
-						{display: "<%=Table_Headers['bp']%>", name : 'bp', width : 75, sortable : true, align: 'left'},
-						<%if @admin_login == true%>{display: "<%=Table_Headers['sp']%>", name : 'sp', width : 70, sortable : true, align: 'left'},<%end%>
-						{display: "<%=Table_Headers['bpvat']%>", name : 'bpvat', width : 110, sortable : true, align: 'left'},
-						{display: "<%=Table_Headers['actualdate']%>", name : 'actualdate', width : 70, sortable : true, align: 'left'}
+						{display: "<%=Price_table_headers['brand']%>", name : 'brand', width : 100, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['family']%>", name : 'family', width : 150, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['dimensiontype']%>", name : 'dimensiontype', width : 130, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['sidewall']%>", name : 'sidewall', width : 60, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['origin']%>", name : 'origin', width : 55, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['runflat']%>", name : 'runflat', width : 50, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['productiondate']%>", name : 'productiondate', width : 40, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['season']%>", name : 'season', width : 40, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['remain']%>", name : 'remain', width : 50, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: "<%=Price_table_headers['supplier']%>", name : 'supplier', width : 55, sortable : true, align: 'left'},<%end%>
+						{display: "<%=Price_table_headers['suppliercomment']%>", name : 'suppliercomment', width : 85, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: "<%=Price_table_headers['rp']%>", name : 'rp', width : 80, sortable : true, align: 'left'},<%end%>
+						{display: "<%=Price_table_headers['bp']%>", name : 'bp', width : 75, sortable : true, align: 'left'},
+						<%if @admin_login == true%>{display: "<%=Price_table_headers['sp']%>", name : 'sp', width : 70, sortable : true, align: 'left'},<%end%>
+						{display: "<%=Price_table_headers['bpvat']%>", name : 'bpvat', width : 110, sortable : true, align: 'left'},
+						{display: "<%=Price_table_headers['actualdate']%>", name : 'actualdate', width : 70, sortable : true, align: 'left'}
 						<%if @admin_login == true%>,
-						{display: "<%=Table_Headers['sourcestring']%>", name : 'sourcestring', width : 600, sortable : true, align: 'left'}<%end%>
+						{display: "<%=Price_table_headers['sourcestring']%>", name : 'sourcestring', width : 600, sortable : true, align: 'left'}<%end%>
 						],
 					params: <%=@checked_array.to_json%>,	
 					sortname: "rp",
@@ -43,12 +43,11 @@
 		
 		<%if @admin_login == true%>
 		$('.nav').delegate('#show_columns','click', function (e) {
-			$('tr td[class="ndcol1"] input[value="9"]').parents('tr').children('td.ndcol2').click();
-			$('tr td[class="ndcol1"] input[value="11"]').parents('tr').children('td.ndcol2').click();	
+			$('tr td[class="ndcol1"] input[value="12"]').parents('tr').children('td.ndcol2').click();	
 			$('tr td[class="ndcol1"] input[value="13"]').parents('tr').children('td.ndcol2').click();
-			$('tr td[class="ndcol1"] input[value="16"]').parents('tr').children('td.ndcol2').click();
+			$('tr td[class="ndcol1"] input[value="14"]').parents('tr').children('td.ndcol2').click();
 			
-			if ($('td[class="ndcol1"] input[value="9"]').is(':checked') && $('td[class="ndcol1"] input[value="11"]').is(':checked') && $('td[class="ndcol1"] input[value="13"]').is(':checked') && $('td[class="ndcol1"] input[value="16"]').is(':checked'))
+			if ($('td[class="ndcol1"] input[value="12"]').is(':checked') && $('td[class="ndcol1"] input[value="13"]').is(':checked') && $('td[class="ndcol1"] input[value="14"]').is(':checked'))
 				$("#show_columns").text("Неповний каталог");
 			else
 				$("#show_columns").text("Повний каталог");

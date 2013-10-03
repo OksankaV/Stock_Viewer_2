@@ -1,0 +1,449 @@
+<% content_for :head do %>
+	<script type="text/javascript">
+	$(document).ready(function() {
+		<%if (@show_modal == "")%>
+		$("#orders_table").flexigrid({
+			url: '/orders_table',
+			dataType: "json",
+			colModel : [
+				{display: "<%=Orders_table_headers['issued']%>", name : 'issued', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['buyer']%>", name : 'buyer', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['article']%>", name : 'article', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['amount']%>", name : 'amount', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['supplier']%>", name : 'supplier', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['inprice']%>", name : 'inprice', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['rate']%>", name : 'rate', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['outprice']%>", name : 'outprice', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['transfered']%>", name : 'transfered', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['transferprice']%>", name : 'transferprice', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['payed_by_buyer']%>", name : 'payed_by_buyer', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['payed_by_us']%>", name : 'payed_by_us', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['status']%>", name : 'status', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['bank']%>", name : 'bank', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['sent']%>", name : 'sent', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['track_id']%>", name : 'track_id', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['cash_flag']%>", name : 'cash_flag', width : 100, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers['notes']%>", name : 'notes', width : 100, sortable : true, align: 'center'}
+				],
+			buttons : [
+				{name: 'Додати нове замовлення', bimage: '/images/add-icon.png', onpress: add_new_order},
+				{separator: true},
+				{name: 'Видалити вибрані замовлення', bimage: '/images/delete-icon.png', onpress: delete_selected_orders},
+				{separator: true},
+				{name: 'Редагувати замовлення', bimage: '/images/edit-icon.png', onpress: edit_order},
+				{separator: true},
+				{name: 'Переглянути список покупців', bimage: '/images/users-icon.png', onpress: buyer_list},
+				{separator: true}
+				],
+			searchitems : [
+				{display: '<%=Orders_table_headers['buyer']%>', name : 'buyer'},
+				{display: '<%=Orders_table_headers['article']%>', name : 'article', isdefault: true}
+				],	
+			sortname: "iso",
+			sortorder: "asc",
+			usepager: true,
+			useRp: true,
+			rp: 15,
+			showTableToggleBtn: true,
+			width: 200,
+			height: 660
+		});
+		<%end%>  
+		
+		$('#typeahead_buyer').typeahead({
+			source: <%=@buyers.to_json%>,
+			items: 20,
+			updater: function(item) {
+				return item;
+			}	
+		});
+		$('#datepicker').datepicker({
+			format: 'dd/mm/yyyy',
+			weekStart: 1,
+			language: 'uk',
+			todayHighlight: true,
+		}).on('changeDate', function(ev){$('#datepicker').datepicker('hide');});
+		
+		function add_new_order(com, grid) 
+		{	
+			$('#add_order_link').click();
+		}		
+
+		function edit_order(com, grid) 
+		{
+			if ($('.trSelected', grid).length == '0')
+			{
+				alert('На вибрано жодного замовлення.');
+			}
+			else if ($('.trSelected', grid).length == '1')
+			{
+				var items = $('.trSelected',grid);
+				var edit_item = items[0].id;
+				$.get("/edit_modal_form",
+                	{item: edit_item},
+                	function(data) {$('#edit_order_modal .modal-body').html(data)}
+                );
+                $('#edit_item').val(edit_item);
+                $('#edit_order_link').click();
+			}
+			else 
+			{
+				alert('Не можливо редагувати відразу декілька замовлень, виберіть, будь ласка, лише одне замовлення.');
+			}			
+		}
+		
+		function delete_selected_orders(com, grid)
+		{
+			if ($('.trSelected', grid).length == '0')
+			{
+				alert('На вибрано жодного замовлення');
+			}
+			else
+			{
+				var confirm_value = confirm('Ви впевнені, що хочете видалити вибрані замовлення?');
+				if (confirm_value)
+				{
+					var items = $('.trSelected',grid);
+                    var itemlist = new Array();;
+                    for(i=0;i<items.length;i++){
+                        itemlist[i] = items[i].id;	 	
+                    }
+					$.get("/delete_orders",
+                       {items: itemlist},
+                       function(data){ location.reload();}
+                    );
+				}
+			}			
+		}
+		
+		function buyer_list(com, grid) 
+		{	
+			window.location.href='/buyers'
+		}	
+
+
+		<%if (@show_modal == 'show_add_modal')%>
+			$('#add_order_modal').modal('show');
+			$('#add_new_order_cencel').click(function(){
+				window.location.href = '/orders';
+			});
+		<%end%>
+		
+		<%if (@show_modal == 'show_edit_modal')%>
+			$.get("/edit_modal_form",
+               	{item: <%=@edit_item%>},
+               	function(data) {$('#edit_order_modal .modal-body').html(data)}
+            );
+            $('div').delegate('#edit_order_modal','shown', function (e) {
+           		$('#edit_buyer').val("<%=@buyer_name%>");
+           	});
+            $('#edit_order_link').click();
+			$('#edit_order_cencel').click(function(){
+				window.location.href = '/orders';
+			});
+		<%end%>
+		
+
+     	$('#add_new_order_button').click(function() {
+			if ($('#typeahead_buyer').val() == "")
+			{
+				alert ("Виберіть покупця зі списку або додайте нового");
+				return false;
+			}
+			if (jQuery.inArray($('#typeahead_buyer').val(), <%=@buyers.to_json%>) < 0)
+			{
+				alert ("Покупця '" + $('#typeahead_buyer').val() + "' не існує, додайте нового або виберіть зі списку");
+				return false;
+			} 
+			if ($('#input_article').val() == "")
+			{
+				alert ("Вкажіть товар");
+				return false;
+			}
+			if ($('#input_amount').val() == "")
+			{
+				alert ("Вкажіть кількість");
+				return false;
+			}  
+		});
+		
+		$('#edit_order_button').click(function() {
+				if ($('#edit_buyer').val() == "")
+				{
+					alert ("Виберіть покупця зі списку або додайте нового");
+					return false;
+				}
+				if (jQuery.inArray($('#edit_buyer').val(), <%=@buyers.to_json%>) < 0)
+				{
+					alert ("Покупця '" + $('#edit_buyer').val() + "' не існує, додайте нового або виберіть зі списку");
+					return false;
+				} 
+				if ($('#edit_article').val() == "")
+				{
+					alert ("Вкажіть товар");
+					return false;
+				}
+				if ($('#edit_amount').val() == "")
+				{
+					alert ("Вкажіть кількість");
+					return false;
+				}  
+		});
+			
+		$('div').delegate('#edit_order_modal','shown', function (e) {
+			$('#edit_buyer').typeahead({
+				source: <%=@buyers.to_json%>,
+				items: 20,
+				updater: function(item) {
+					return item;
+				}	
+			});
+			
+			$('#datepicker_edit').datepicker({
+				format: 'dd/mm/yyyy',
+				weekStart: 1,
+				language: 'uk',
+				todayHighlight: true,
+			}).on('changeDate', function(ev){$('#datepicker_edit').datepicker('hide');});
+			
+			$('#shown_modal').val("show_edit_modal");
+			
+			$('#add_buyer_button_in_edit').click(function(){
+				$('#edit_order_modal').modal('hide');
+				$('#add_buyer_link').click();
+			});
+			
+		});
+		
+		$('#add_order_modal').on('shown', function (e) {
+			$('#shown_modal').val("show_add_modal");
+		});
+			
+
+		$("#add_buyer_button").click(function() {
+			if ($('#input_buyer').val() == "")
+			{
+				alert ("Вкажіть покупця");
+				return false;
+			}
+			if (jQuery.inArray($('#input_buyer').val(), <%=@buyers.to_json%>) >= 0)
+			{
+				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
+				return false;
+			}
+		});
+		
+		$('#add_buyer_cencel').click(function(){
+			$('#add_buyer_modal').modal('hide');
+			if ($('#shown_modal').val() == "show_add_modal")
+				$('#add_order_modal').modal('show');
+			if ($('#shown_modal').val() == "show_edit_modal")
+				$('#edit_order_modal').modal('show');
+		});
+				
+		$('#add_buyer_button_in_order').click(function(){
+			$('#add_order_modal').modal('hide');
+			$('#add_buyer_link').click();
+		});
+			
+		
+	});
+		
+
+</script>
+<style>
+	.modal {
+		width: 760px;
+		margin-left: -380px;
+	}
+	.modal-body {
+		max-height: 450px;
+	}
+	.row-fluid.middle{
+    	 display: table-cell;
+		  vertical-align: bottom;
+		  float: none;
+	}
+</style>
+<%end%>
+
+<%if (@show_modal == "") %>
+	<%if (@count > 0) %>
+		<h5>Список замовлень</h5>
+		<table id="orders_table"></table>
+	<%else%>
+		<div class="alert alert-info" align="center"><strong>Немає жодного замовлення в базі даних</strong></div>
+		<div align="center">
+			<button class="btn btn-primary btn-large" type="button" onclick="$('#add_order_link').click();"><strong>Дотати нове замовлення</strong></button>
+		</div>	
+	<%end%>	
+<%end%>
+
+<a id="add_order_link" href="#add_order_modal" data-toggle="modal" hidden></a>
+<a id="edit_order_link" href="#edit_order_modal" data-toggle="modal" hidden></a>
+<a id="delete_order_link" href="#delete_order_modal" data-toggle="modal" hidden></a>
+<a id="add_buyer_link" href="#add_modal_buyer" data-toggle="modal" hidden></a>
+
+<div id="add_order_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="add_modal_label">Нове замовлення</h3>
+	</div>
+	<div class="modal-body">
+		<form id="add_new_order_form" action="/add_new_order" method="post" onsubmit="return validate_order_form()">      
+			<div class="row-fluid">   
+				<div class="span20 lightblue">
+					<label>Виберіть покупця</label>
+					<input id="typeahead_buyer" name="typeahead_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=@buyer_name%>">
+				</div>
+				<div class="span4 lightblue">
+					<label for="add_buyer_button_in_order">Новий покупець</label>
+					<a id="add_buyer_button_in_order" class="btn span24">Додати</a>
+				</div>
+			</div>
+			
+			<div class="row-fluid">
+				<div class="span20 bgcolor">
+					<label><%=Orders_table_headers['article']%></label>
+					<input type="text" id="input_article" name="input_article" class="span24">
+				</div>
+				<div class="span4 bgcolor">
+					<label><%=Orders_table_headers['amount']%></label>
+					<input type="text" id="input_amount" name="input_amount" class="span24">
+				</div>
+			</div>
+
+			<div class="row-fluid">
+				<div class="span4 lightblue">
+					<label><%=Orders_table_headers['supplier']%></label>
+					<input type="text" id="input_supplier" name="input_supplier" class="span24">  
+				</div>
+				<div class="span4 bgcolor">
+					<label><%=Orders_table_headers['inprice']%></label>
+					<input type="text" id="input_inprice" name="input_inprice" class="span24">
+				</div>
+				<div class="span4 bgcolor">
+					<label><%=Orders_table_headers['rate']%></label>
+					<input type="text" id="input_rate" name="input_rate" class="span24">
+				</div>
+				<div class="span4 bgcolor">
+					<label><%=Orders_table_headers['outprice']%></label>
+					<input type="text" id="input_outprice" name="input_outprice" class="span24">
+				</div>
+				<div class="span4 bgcolor">
+					<label><%=Orders_table_headers['transfered']%></label>
+					<input type="text" id="input_transfered" name="input_transfered" class="span24">
+				</div>
+				<div class="span4 bgcolor">
+					<label><%=Orders_table_headers['transferprice']%></label>
+					<input type="text" id="input_transferprice" name="input_transferprice" class="span24">
+				</div>
+
+			</div>
+			<div class="row-fluid">
+				<div class="span5 bgcolor">
+					<label><%=Orders_table_headers['status']%></label>
+					<select id="input_status" class="span24" name="input_status">
+						<option value="0"><%=Status_values_array[0]%></option>
+						<option value="1"><%=Status_values_array[1]%></option>
+						<option value="2"><%=Status_values_array[2]%></option>
+						<option value="3"><%=Status_values_array[3]%></option>
+					</select>
+				</div>
+				<div class="offset1 span6 bgcolor"><br>
+					<div class="controls span24">
+					<label class="checkbox ">
+						<input type="checkbox" id="input_payed_by_buyer" name="input_payed_by_buyer"> <%=Orders_table_headers['payed_by_buyer']%>
+					</label>
+
+					</div>
+				</div>
+				
+				<div class="span6 bgcolor"><br>
+					<div class="controls span24">
+					<label class="checkbox ">
+						<input type="checkbox" id="input_payed_by_us" name="input_payed_by_us"> <%=Orders_table_headers['payed_by_us']%>
+					</label>
+					</div>
+				</div>
+
+				<div class="span6 bgcolor"><br>
+					<label class="checkbox inline">
+						<input type="checkbox" id="input_cash_flag" name="input_cash_flag"> <%=Orders_table_headers['cash_flag']%>
+					</label>
+				</div>
+			</div>
+			<div class="row-fluid">
+				<div class="span12 bgcolor">
+					<label><%=Orders_table_headers['bank']%></label>
+					<input type="text" id="input_bank" name="input_bank" class="span24">
+				</div>
+				<div class="span6 bgcolor">
+					<label><%=Orders_table_headers['track_id']%></label>
+					<input type="text" id="input_track_id" name="input_track_id" class="span24">
+				</div>
+				<div class="span6 bgcolor">
+					<label><%=Orders_table_headers['sent']%></label>
+					<div class="row-fluid input-append date" id="datepicker"  data-date-format="dd/mm/yyyy">
+						<input id="input_sent" name="input_sent" class="input-block-level span19" type="text" autocomplete="off" readonly>
+						<div class="add-on">
+							<div align="center"><i class="icon-calendar"></i></div>	
+						</div>
+					</div>	
+					
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button id="add_new_order_cencel" class="btn" data-dismiss="modal" aria-hidden="true">Відмінити</button>
+		<button id="add_new_order_button" form="add_new_order_form" class="btn btn-primary">Зберегти</button>
+		
+	</div>
+</div>
+
+<div id="add_modal_buyer" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="add_modal_label_buyer">Новий замовник</h3>
+	</div>
+	<div class="modal-body">
+		<form id="add_new_buyer_form" action="/add_new_buyer" method="post">      
+			<div class="row-fluid">   
+				<div class="span24">
+					<label for="input_buyer"><%=Orders_table_headers['buyer']%></label>
+					<input type="text" id="input_buyer" name="input_buyer" class="span24">  
+				</div>
+			</div>
+			<div class="row-fluid">
+				<div class="span24">
+					<label><%=Orders_table_headers['notes']%></label>
+					<textarea type="text" id="input_notes" name="input_notes" class="span24" rows="2"></textarea>
+				</div>
+			</div>
+			<input id="shown_modal" name="shown_modal" type="hidden" value="">
+			<input id="edit_item" name="edit_item" type="hidden" value="">
+		</form>
+	
+	</div>
+	<div class="modal-footer">
+		<button id="add_buyer_cencel" class="btn" data-dismiss="modal" aria-hidden="true">Відмінити</button>
+		<input id="add_buyer_button" type="submit" form="add_new_buyer_form" class="btn btn-primary" value="Зберегти">
+	</div>
+</div>
+
+<div id="edit_order_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3 id="edit_modal_label">Редагувати замовлення</h3>
+	</div>
+	<div class="modal-body">
+	</div>
+	<div class="modal-footer">
+		<button id="edit_order_cencel" class="btn" data-dismiss="modal" aria-hidden="true">Відмінити</button>
+		<button id="edit_order_button" form="edit_order_form" class="btn btn-primary">Зберегти</button>
+		
+	</div>
+</div>
+
+
