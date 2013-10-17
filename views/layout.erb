@@ -40,6 +40,10 @@
 			font-weight: bold;
     	}
 		.brand {text-transform: uppercase;}
+		#dropdown_download_price {
+			letter-spacing: 2px;
+			text-transform: uppercase;
+		}
 		</style>
 		
 		<%= yield_content :head %>
@@ -51,9 +55,10 @@
 					<a class="brand" href="/">vsikolesa</a>
 					<div class="pull-left">
 						<ul class="nav">
+
 							<li><a href='/' class="price_link">Каталог шин</a></li>
-							<li><p class="navbar-text"><%=$price_date%></p></li>
-							
+							<li><p class="navbar-text"><%=$price_date%></p>
+														
 							<li class="dropdown">
 				              <a id="dropdown_download_price" href="#" role="button" class="dropdown-toggle price_link" data-toggle="dropdown">Скачати прайс<b class="caret"></b></a>
 				              <ul class="dropdown-menu" role="menu" aria-labelledby="dropdown_download_price">
@@ -61,16 +66,22 @@
 								<li role="presentation"><a role="menuitem" tabindex="-1" href="http://yadi.sk/d/NTIOrte-7T31x" target="_blank">Новий формат (XLSX)</a></li>
 				              </ul>
 				            </li>
-				            <%if admin?%>
-								<li><a id="orders" href='/orders'>Замовлення</a></li>
+							<%if admin?%>
+								<li><a id="orders" href='/orders' class="price_link">Замовлення</a></li>
+								<%if @admin_filter_page == true%>
+								<li><a id="advanced_filter" class="price_link">Розширений фільтр</a></li>
+								<%end%>
 							<%end%> 
+							
+
+
 						</ul>	
 					</div>
 					<div class="pull-right">
 						<ul class="nav">
 						<%if admin?%>
-							<%if @admin_login == true%>
-								<li><a id="show_columns">Неповний каталог</a></li>
+							<%if @admin_select_items_page == true%>
+								<li><a id="show_columns">Повний каталог</a></li>
 							<%end%>
 							<li><a href='/logout'>Вийти <strong><%=settings.username%></strong></a></li>
 						<%else%>

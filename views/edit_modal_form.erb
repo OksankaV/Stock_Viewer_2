@@ -1,11 +1,11 @@
 		<form id="edit_order_form" action="/edit_order" method="post" onsubmit="return validate_order_form()">
 			<input name="edit_id" type="hidden" value="<%=@edit_item%>">  
 			<div class="row-fluid">   
-				<div class="span20 lightblue">
+				<div class="span18 lightblue">
 					<label>Виберіть покупця</label>
 					<input id="edit_buyer" name="edit_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=@edit_data_hash['buyer']%>">
 				</div>
-				<div class="span4 lightblue">
+				<div class="span6 lightblue">
 					<label for="add_buyer_button_in_edit">Новий покупець</label>
 					<a id="add_buyer_button_in_edit" class="btn span24">Додати</a>
 				</div>

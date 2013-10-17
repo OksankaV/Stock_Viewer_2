@@ -42,13 +42,12 @@ def select_data_from_db()
 	if File.exists?("data/tyre.db")
 		$db = SQLite3::Database.new("data/tyre.db")
 		$price_date_check = File.new("data/tyre.db").mtime
-		$price_date = File.new("data/tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y о %R)")
+		$price_date = File.new("data/tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y)")
 	end
-	$tyre_providers = $db.execute("SELECT DISTINCT supplier FROM price")
 	$tyre_size = $db.execute("SELECT DISTINCT sectionsize FROM price ORDER BY sectionsize ASC").flatten
 	$tyre_diameter = $db.execute("SELECT DISTINCT diameterc FROM price ORDER BY diameterc ASC").flatten
-	$tyre_index = $db.execute("SELECT DISTINCT diameterc FROM price ORDER BY diameterc ASC").flatten
-	$tyre_season = $db.execute("SELECT DISTINCT season FROM price ORDER BY diameterc ASC").flatten
+	$tyre_season = $db.execute("SELECT DISTINCT season FROM price ORDER BY season ASC").flatten
+	$tyre_supplier = $db.execute("SELECT DISTINCT supplier FROM price ORDER BY supplier ASC").flatten
 
 	tyre_family_brand_name = $db.execute("SELECT DISTINCT family, brand FROM price")
 
@@ -98,6 +97,24 @@ def select_values(param_select_values,new_param_value,db_array)
     return (select_array)
 end
 
+def detect_one_select_value(input_value,select_value)
+	return_value = ""
+	if ((input_value == nil) || (input_value == ""))
+		if select_value == nil
+			return_value = ""
+		else
+			if select_value != ""
+				return_value = select_value
+			else
+				return_value = ""
+			end	
+		end
+	else		
+		return_value = input_value
+	end
+	return return_value
+end
+
 def filter_select(select, value, check_value, text, hash_key)
     if check_value.include?(value)
 		select = select + text
@@ -130,54 +147,24 @@ get '/' do
 		@select_sizes = []
 		@select_diameters = []
 		@select_seasons = []
+		@select_suppliers = []
 		@select_date = ""
 		@select_remain = ""
+		@select_start_price = ""
+		@select_finish_price = ""
     else	
 		@select_brands = select_values(params[:tyre_brand_selected],params[:tyre_brand_typeahead],$tyre_brand_name)
 		@select_families = select_values(params[:tyre_family_selected],params[:tyre_family_typeahead],$tyre_family_name)
 		@select_sizes = select_values(params[:tyre_size_selected],params[:tyre_size_typeahead],$tyre_size)
 		@select_diameters = select_values(params[:tyre_diameter_selected],params[:tyre_diameter_typeahead],$tyre_diameter)
-		#if params[:tyre_season_selected] != nil
-		#	select_seasons = []
-		#	params[:tyre_season_selected].each do |value|
-		#		select_seasons.push(Seasons.index(value).to_s)
-		#	end
-		#end
 		@select_seasons = select_values(params[:tyre_season_selected],"",$tyre_season)
+		@select_suppliers = select_values(params[:tyre_supplier_selected],params[:tyre_supplier_typeahead],$tyre_supplier)
 
-		if params[:tyre_date_selected] == nil
-			@select_date = ""
-		else
-			if params[:tyre_date_selected] != ""
-				@select_date = params[:tyre_date_selected]
-			else
-				@select_date = ""
-			end	
-		end
-		if params[:tyre_date_typeahead] == nil
-			@select_date = ""
-		else	
-			if params[:tyre_date_typeahead] != ""
-				@select_date = params[:tyre_date_typeahead]
-			end
-		end	
-	
-		if params[:tyre_remain_selected] == nil
-			@select_remain = ""
-		else
-			if params[:tyre_remain_selected] != ""
-				@select_remain = params[:tyre_remain_selected]
-			else
-				@select_remain = ""
-			end	
-		end
-		if params[:tyre_remain_typeahead] == nil
-			@select_remain = ""
-		else	
-			if params[:tyre_remain_typeahead] != ""
-				@select_remain = params[:tyre_remain_typeahead]
-			end
-		end	
+		@select_date = detect_one_select_value(params[:tyre_date_typeahead],params[:tyre_date_selected])
+		@select_remain = detect_one_select_value(params[:tyre_remain_typeahead],params[:tyre_remain_selected])
+		@select_start_price = detect_one_select_value(params[:tyre_start_price_input],params[:tyre_start_price_selected])
+		@select_finish_price = detect_one_select_value(params[:tyre_finish_price_input],params[:tyre_finish_price_selected])
+
 	
 	end
 
@@ -208,13 +195,24 @@ get '/' do
 		@table_href += "&remain="
 	else	
 		@table_href += "&remain=" + @select_remain
+	end
+	if @select_start_price.empty?  
+		@table_href += "&start_price="
+	else	
+		@table_href += "&start_price=" + @select_start_price
+	end
+	if @select_finish_price.empty?  
+		@table_href += "&finish_price="
+	else	
+		@table_href += "&finish_price=" + @select_finish_price
 	end	
 	#make_href(@select_brands,"&brand","&brand[]")
 	make_href(@select_families,"&family","&family[]")
 	make_href(@select_sizes,"&size","&size[]")
 	make_href(@select_diameters,"&diameter","&diameter[]")
 	make_href(@select_seasons,"&season","&season[]")
-	@table_url= @table_href
+	make_href(@select_suppliers,"&supplier","&supplier[]")
+	@table_url = @table_href
 	@show_table = false
 	
 	@bind_hash = {}
@@ -289,10 +287,40 @@ get '/' do
 				select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
 				select_string =  select_string + " ) "
 			end
+			
+			if @select_suppliers.empty? == false
+				select_string = select_string + " and ( "
+				i=0
+				@select_suppliers.each do |tyre_suppliers_check|
+					if i == 0
+						select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, "supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+					else
+						select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, " or supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+					end
+					i += 1
+				end
+				select_string =  select_string + " ) "
+			end
 	
 			if @select_remain.empty? == false
 				select_string = select_string + " and (remain >= :remain or remain = 0) "
 				@bind_hash["remain".to_sym] = @select_remain
+			end
+			
+			if @select_start_price.empty? == false || @select_finish_price.empty? == false
+				select_string = select_string + " and ( "
+				if @select_start_price != ""
+					select_string = select_string + "rp >= :start_price"
+					@bind_hash["start_price".to_sym] = @select_start_price
+				end
+				if (@select_start_price != "" && @select_finish_price != "")
+					select_string = select_string + " and "
+				end
+				if @select_finish_price != ""
+					select_string = select_string + "rp <= :finish_price"
+					@bind_hash["finish_price".to_sym] = @select_finish_price
+				end
+				select_string = select_string + " ) "
 			end
 	
 			if @select_date.empty? == false
@@ -302,7 +330,6 @@ get '/' do
 			end
 	
 			select_string = select_string + "GROUP BY brand ORDER BY brand"
-
 			select_brand_price_array = $db.execute(select_string, @bind_hash)
 	
 			@select_brand_price_hash = {}
@@ -324,8 +351,16 @@ get '/' do
 		@search_primary_btn = "btn-primary"
 		@show_primary_btn = "" 	
 	end
-
-	erb :filter
+	if admin?
+		protected!
+		#@show_all_columns = true
+		@admin_filter_page = true
+		erb :filter
+	else
+		@admin_filter_page = false
+		erb :filter
+	end 
+	
 
 end
 
@@ -338,13 +373,18 @@ get '/table' do
     select_sizes = params[:size]
     select_diameters = params[:diameter]
     select_diameters = "" if select_diameters == nil 
+    select_suppliers = params[:supplier]
+    select_suppliers = "" if select_suppliers == nil 
     select_seasons = params[:season]
     select_seasons = "" if select_seasons == nil 
     select_date = params[:date]
     select_date = "" if select_date == nil 
     select_remain = params[:remain]
-    select_remain = "" if select_remain == nil 
-    
+    select_remain = "" if select_remain == nil
+    select_start_price = params[:start_price]
+    select_start_price = "" if select_start_price == nil
+    select_finish_price = params[:finish_price]
+    select_finish_price = "" if select_finish_price == nil 
     
     select_string = "select * from price where"
 	select_string = select_string + " ( "
@@ -398,6 +438,19 @@ get '/table' do
 		end
 		select_string =  select_string + " ) "
 	end
+	if select_suppliers.empty? == false
+		select_string = select_string + " and ( "
+		i=0
+		select_suppliers.each do |tyre_suppliers_check|
+			if i == 0
+				select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, "supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+			else
+				select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, " or supplierc = :supplier" + i.to_s, "supplier" + i.to_s)
+			end
+			i += 1
+		end
+		select_string =  select_string + " ) "
+	end
 	if select_seasons.empty? == false
 		select_string = select_string + " and ( "
 		i=0
@@ -417,6 +470,22 @@ get '/table' do
 		select_string = select_string + " and (remain >= :remain or remain = 0) "
 		@bind_hash["remain".to_sym] = select_remain
 	end
+	
+	if select_start_price.empty? == false || select_finish_price.empty? == false
+		select_string = select_string + " and ( "
+		if select_start_price != ""
+			select_string = select_string + "rp >= :start_price"
+			@bind_hash["start_price".to_sym] = select_start_price
+		end
+		if (select_start_price != "" && select_finish_price != "")
+			select_string = select_string + " and "
+		end
+		if select_finish_price != ""
+			select_string = select_string + "rp <= :finish_price"
+			@bind_hash["finish_price".to_sym] = select_finish_price
+		end
+		select_string = select_string + " ) "
+	end
 
 	
 	if select_date.empty? == false
@@ -427,6 +496,8 @@ get '/table' do
 	
 	all_data_array = []
 	show_data_array = []
+	p "-----------------"
+	p select_string
 	select_all_data = $db.execute(select_string, @bind_hash)
 	select_all_data.each do |one_row_data|
 		data_hash = {}
@@ -495,13 +566,19 @@ post '/selected_items' do
     select_families = [] if select_families == nil 
     select_sizes = params[:size]
     select_diameters = params[:diameter]
-    select_diameters = [] if select_diameters == nil 
+    select_diameters = [] if select_diameters == nil
+    select_suppliers = params[:supplier]
+    select_suppliers = [] if select_suppliers == nil 
     select_seasons = params[:season]
     select_seasons = [] if select_seasons == nil 
     select_date = params[:date]
     select_date = "" if select_date == nil 
     select_remain = params[:remain]
     select_remain = "" if select_remain == nil
+    select_start_price = params[:start_price]
+    select_start_price = "" if select_start_price == nil
+    select_finish_price = params[:finish_price]
+    select_finish_price = "" if select_finish_price == nil 
 
 	@show_table = true
 	checked_id_array = params[:checked_id]
@@ -519,6 +596,7 @@ post '/selected_items' do
 	add_to_checked_array(select_brands,"brand[]")
 	add_to_checked_array(select_families,"family[]")
 	add_to_checked_array(select_diameters,"diameter[]")
+	add_to_checked_array(select_suppliers,"supplier[]")
 	add_to_checked_array(select_seasons,"season[]")
 	if select_date.empty? == false
 		hash = {}
@@ -531,17 +609,27 @@ post '/selected_items' do
 		hash['name'] = "remain"
 		hash['value'] = select_remain
 		@checked_array.push(hash)
-	end	
+	end
+	if select_start_price.empty? == false
+		hash = {}
+		hash['name'] = "start_price"
+		hash['value'] = select_start_price
+		@checked_array.push(hash)
+	end
+	if select_finish_price.empty? == false
+		hash = {}
+		hash['name'] = "finish_price"
+		hash['value'] = select_finish_price
+		@checked_array.push(hash)
+	end
 	@message = "Ви не вибрали жодного елементу"
 	
 	if admin?
 		protected!
-		#@show_all_columns = true
-		
-		@admin_login = true
+		@admin_select_items_page = true
 		erb :selected_items
 	else
-		@admin_login = false
+		@admin_select_items_page = false
 		erb :selected_items
 	end 
 	
@@ -554,13 +642,21 @@ post '/table_selected_items' do
     select_families = [] if select_families == nil 
     select_sizes = params[:size]
     select_diameters = params[:diameter]
-    select_diameters = [] if select_diameters == nil 
+    select_diameters = [] if select_diameters == nil
+    select_suppliers = params[:supplier]
+    select_suppliers = [] if select_suppliers == nil 
     select_seasons = params[:season]
     select_seasons = [] if select_seasons == nil 
     select_date = params[:date]
     select_date = "" if select_date == nil 
     select_remain = params[:remain]
     select_remain = "" if select_remain == nil 
+    select_start_price = params[:start_price]
+    select_start_price = "" if select_start_price == nil
+    select_finish_price = params[:finish_price]
+    select_finish_price = "" if select_finish_price == nil 
+    p params
+    
 	@checked_id_array = params[:checked_id]
 	@checked_id_array = [] if @checked_id_array == nil 	
 	@checked_brand_array = params[:checked_brand]
@@ -614,6 +710,19 @@ post '/table_selected_items' do
 			end
 			select_string =  select_string + " ) "
 		end
+		if select_suppliers.empty? == false
+			select_string = select_string + " and ( "
+			i=0
+			select_suppliers.each do |tyre_suppliers_check|
+				if i == 0
+					select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, "supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+				else
+					select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, " or supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+				end
+				i += 1
+			end
+			select_string =  select_string + " ) "
+		end
 		if select_seasons.empty? == false
 			select_string = select_string + " and ( "
 			i=0
@@ -632,6 +741,22 @@ post '/table_selected_items' do
 		if select_remain.empty? == false
 			select_string = select_string + " and (remain >= :remain or remain = 0) "
 			@bind_hash["remain".to_sym] = select_remain
+		end
+		
+		if select_start_price.empty? == false || select_finish_price.empty? == false
+			select_string = select_string + " and ( "
+			if select_start_price != ""
+				select_string = select_string + "rp >= :start_price"
+				@bind_hash["start_price".to_sym] = select_start_price
+			end
+			if (select_start_price != "" && select_finish_price != "")
+				select_string = select_string + " and "
+			end
+			if select_finish_price != ""
+				select_string = select_string + "rp <= :finish_price"
+				@bind_hash["finish_price".to_sym] = select_finish_price
+			end
+			select_string = select_string + " ) "
 		end
 
 	
@@ -677,7 +802,6 @@ post '/table_selected_items' do
 	select_count = select_string.gsub(/\*/,"count(*)")
 	
 	rows_count = $db.execute(select_count, @bind_hash).flatten
-
 	@select_string_to_excel = select_string
 	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i.to_i
 	select_string = select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
@@ -818,135 +942,154 @@ get('/logout'){ response.set_cookie(settings.username, false) ; redirect '/' }
 
 post '/excel_file' do
 	@bind_hash = {}
-	select_params = JSON.parse(params[:excel_button])
-	checked_brands = []
-	checked_ids = []
-	select_sizes = []
-	select_brands = []
-	select_families = []
-	select_diameters = []
-	select_seasons = []
-	select_remain = ''
-	select_date = ''
-	select_params.each do |hash|
-		if hash["name"] == "checked_brand[]"
-			checked_brands.push(hash["value"])
-		end
-		if hash["name"] == "checked_id[]"
-			checked_ids.push(hash["value"])
-		end
-		if hash["name"] == "brand[]"
-			select_brands.push(hash["value"])
-		end
-		if hash["name"] == "size[]"
-			select_sizes.push(hash["value"])
-		end
-		if hash["name"] == "family[]"
-			select_families.push(hash["value"])
-		end
-		if hash["name"] == "diameter[]"
-			select_diameters.push(hash["value"])
-		end
-		if hash["name"] == "season[]"
-			select_seasons.push(hash["value"])
-		end
-		if hash["name"] == "remain"
-			select_remian = hash["value"]
-		end
-		if hash["name"] == "date"
-			select_date = hash["value"]
-		end	
-	end
-
-	select_string = "select * from price where"
-
-    if checked_brands.empty? == false
-    	select_string = select_string + " ( "
-		i=0
-		select_sizes.each do |tyre_sizes_check|
-			if i == 0
-				select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
-			else
-				select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+	select_params = JSON.parse(params[:excel_button_all])
+	select_row_id_array = params[:excel_button_selected].gsub(/row/,"").split(',')
+	if select_row_id_array == []
+		checked_brands = []
+		checked_ids = []
+		select_sizes = []
+		select_brands = []
+		select_families = []
+		select_diameters = []
+		select_suppliers = []
+		select_seasons = []
+		select_remain = ''
+		select_date = ''
+		select_params.each do |hash|
+			if hash["name"] == "checked_brand[]"
+				checked_brands.push(hash["value"])
 			end
-			i += 1
-		end
-		select_string =  select_string + " ) "
-	
-		if select_families.empty? == false
-			select_string = select_string + " and ( "
-			i=0
-			select_families.each do |tyre_families_check|
-				if i == 0
-					select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
-				else
-					select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
-				end
-				i += 1
+			if hash["name"] == "checked_id[]"
+				checked_ids.push(hash["value"])
 			end
-			select_string =  select_string + " ) "
-		end
-		if select_diameters.empty? == false
-			select_string = select_string + " and ( "
-			i=0
-			select_diameters.each do |tyre_diameters_check|
-				if i == 0
-					select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
-				else
-					select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
-				end
-				i += 1
+			if hash["name"] == "brand[]"
+				select_brands.push(hash["value"])
 			end
-			select_string =  select_string + " ) "
-		end
-		if select_seasons.empty? == false
-			select_string = select_string + " and ( "
-			i=0
-			select_seasons.each do |tyre_seasons_check|
-				if i == 0
-					select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
-				else
-					select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
-				end
-				i += 1
+			if hash["name"] == "size[]"
+				select_sizes.push(hash["value"])
 			end
-			select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
-			select_string =  select_string + " ) "
-		end
-	
-		if select_remain.empty? == false
-			select_string = select_string + " and (remain >= :remain or remain = 0) "
-			@bind_hash["remain".to_sym] = select_remain
+			if hash["name"] == "family[]"
+				select_families.push(hash["value"])
+			end
+			if hash["name"] == "diameter[]"
+				select_diameters.push(hash["value"])
+			end
+			if hash["name"] == "supplier[]"
+				select_suppliers.push(hash["value"])
+			end
+			if hash["name"] == "season[]"
+				select_seasons.push(hash["value"])
+			end
+			if hash["name"] == "remain"
+				select_remian = hash["value"]
+			end
+			if hash["name"] == "date"
+				select_date = hash["value"]
+			end	
 		end
 
-	
-		if select_date.empty? == false
-			select_string = select_string + " and (actualdate >= :date) "
-			date = select_date.scan(/(\d+)\/(\d+)\/(\d+)/).flatten
-			@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
-		end
-    	
-		select_string = select_string + " and ( "
-		i = 0
-		checked_brands.each do |checked_brand|
-			if i == 0
-				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
-			else
-				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
-			end
-			i += 1
-		end
-		select_string =  select_string + " ) "
-	end
-    	
-	if checked_ids.empty? == false
+		select_string = "select * from price where"
+
 		if checked_brands.empty? == false
-			select_string = select_string + " or ( "
-		else
 			select_string = select_string + " ( "
+			i=0
+			select_sizes.each do |tyre_sizes_check|
+				if i == 0
+					select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, "sectionsize = :size" + i.to_s, "size" + i.to_s)
+				else
+					select_string = filter_select(select_string, tyre_sizes_check, $tyre_size, " or sectionsize = :size" + i.to_s, "size" + i.to_s)
+				end
+				i += 1
+			end
+			select_string =  select_string + " ) "
+	
+			if select_families.empty? == false
+				select_string = select_string + " and ( "
+				i=0
+				select_families.each do |tyre_families_check|
+					if i == 0
+						select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, "family = :family" + i.to_s, "family" + i.to_s)
+					else
+						select_string = filter_select(select_string, tyre_families_check, $tyre_family_name, " or family = :family" + i.to_s, "family" + i.to_s)
+					end
+					i += 1
+				end
+				select_string =  select_string + " ) "
+			end
+			if select_diameters.empty? == false
+				select_string = select_string + " and ( "
+				i=0
+				select_diameters.each do |tyre_diameters_check|
+					if i == 0
+						select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, "diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+					else
+						select_string = filter_select(select_string, tyre_diameters_check, $tyre_diameter, " or diameterc = :diameterc" + i.to_s, "diameterc" + i.to_s)
+					end
+					i += 1
+				end
+				select_string =  select_string + " ) "
+			end
+			if select_suppliers.empty? == false
+				select_string = select_string + " and ( "
+				i=0
+				select_suppliers.each do |tyre_suppliers_check|
+					if i == 0
+						select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, "supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+					else
+						select_string = filter_select(select_string, tyre_suppliers_check, $tyre_supplier, " or supplier = :supplier" + i.to_s, "supplier" + i.to_s)
+					end
+					i += 1
+				end
+				select_string =  select_string + " ) "
+			end
+			if select_seasons.empty? == false
+				select_string = select_string + " and ( "
+				i=0
+				select_seasons.each do |tyre_seasons_check|
+					if i == 0
+						select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, "season = :season" + i.to_s, "season" + i.to_s)
+					else
+						select_string = filter_select(select_string, tyre_seasons_check, $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+					end
+					i += 1
+				end
+				select_string = filter_select(select_string, "0", $tyre_season, " or season = :season" + i.to_s, "season" + i.to_s)
+				select_string =  select_string + " ) "
+			end
+	
+			if select_remain.empty? == false
+				select_string = select_string + " and (remain >= :remain or remain = 0) "
+				@bind_hash["remain".to_sym] = select_remain
+			end
+
+	
+			if select_date.empty? == false
+				select_string = select_string + " and (actualdate >= :date) "
+				date = select_date.scan(/(\d+)\/(\d+)\/(\d+)/).flatten
+				@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
+			end
+			
+			select_string = select_string + " and ( "
+			i = 0
+			checked_brands.each do |checked_brand|
+				if i == 0
+					select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+				else
+					select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+				end
+				i += 1
+			end
+			select_string =  select_string + " ) "
 		end
-		i = 0
-		checked_ids.each do |checked_id|
+			
+		if checked_ids.empty? == false
+			if checked_brands.empty? == false
+				select_string = select_string + " or ( "
+			else
+				select_string = select_string + " ( "
+			end
+			i = 0
+			checked_ids.each do |checked_id|
 				if i == 0
 					@bind_hash[("id" + i.to_s).to_sym] = checked_id
 					select_string = select_string + "id = :id" + i.to_s
@@ -958,7 +1101,22 @@ post '/excel_file' do
 			end
 			select_string =  select_string + " ) "
 		end
-		
+	else
+		select_string = "select * from price where ("
+		i = 0
+			select_row_id_array.each do |row_id|
+				if i == 0
+					@bind_hash[("id" + i.to_s).to_sym] = row_id.to_i
+					select_string = select_string + "id = :id" + i.to_s
+				else
+					@bind_hash[("id" + i.to_s).to_sym] = row_id.to_i
+					select_string = select_string + " or id = :id" + i.to_s
+				end
+				i += 1
+			end
+		select_string =  select_string + " ) "	
+	end		
+
 	all_data_array = []
 	select_all_data = $db.execute(select_string, @bind_hash)
 	select_all_data.each do |one_row_data|
@@ -1040,9 +1198,9 @@ post '/excel_file' do
 				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'], row_hash['supplier'], row_hash['suppliercomment'], row_hash['rp'], row_hash['bp'], row_hash['sp'], row_hash['bpvat'], row_hash['actualdate'], row_hash['sourcestring']], :style => default  
 			end
 		else
-			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['bp'], Price_table_headers['bpvat'], Price_table_headers['actualdate']], :style => header
+			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['actualdate']], :style => header
 			all_data_array.each do |row_hash|
-				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['bp'], row_hash['bpvat'], row_hash['actualdate']], :style => default 
+				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['actualdate']], :style => default 
 			end
 		end 
 

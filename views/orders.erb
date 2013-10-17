@@ -35,10 +35,6 @@
 				{name: 'Переглянути список покупців', bimage: '/images/users-icon.png', onpress: buyer_list},
 				{separator: true}
 				],
-			searchitems : [
-				{display: '<%=Orders_table_headers['buyer']%>', name : 'buyer'},
-				{display: '<%=Orders_table_headers['article']%>', name : 'article', isdefault: true}
-				],	
 			sortname: "iso",
 			sortorder: "asc",
 			usepager: true,
@@ -104,7 +100,7 @@
 				if (confirm_value)
 				{
 					var items = $('.trSelected',grid);
-                    var itemlist = new Array();;
+                    var itemlist = new Array();
                     for(i=0;i<items.length;i++){
                         itemlist[i] = items[i].id;	 	
                     }
@@ -264,6 +260,17 @@
 		  vertical-align: bottom;
 		  float: none;
 	}
+	.flexigrid div.pDiv2 {
+		padding-left: 15%;
+		font-family: Verdana,Arial,Geneva,Helvetica,sans-serif;
+		font-size: 12px;
+	}
+	.rp_dropdown
+	{
+		height: 25px;
+		width: 70px;
+		padding: 2px;
+	}
 </style>
 <%end%>
 
@@ -292,11 +299,11 @@
 	<div class="modal-body">
 		<form id="add_new_order_form" action="/add_new_order" method="post" onsubmit="return validate_order_form()">      
 			<div class="row-fluid">   
-				<div class="span20 lightblue">
-					<label>Виберіть покупця</label>
+				<div class="span18 lightblue">
+					<label>Виберіть покупця зі списку або додайте нового</label>
 					<input id="typeahead_buyer" name="typeahead_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=@buyer_name%>">
 				</div>
-				<div class="span4 lightblue">
+				<div class="span6 lightblue">
 					<label for="add_buyer_button_in_order">Новий покупець</label>
 					<a id="add_buyer_button_in_order" class="btn span24">Додати</a>
 				</div>
