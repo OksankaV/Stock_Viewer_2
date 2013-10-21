@@ -702,27 +702,27 @@
 							<div name="no_remain" align="center">всі</div>	
 						<%end%>
 					</div>
-				
 					<div class="span5 well_family">
-						<div id="block_price_range" class="well_family_head" align="center">
-							<strong>Діапазон цін</strong>
+						<div id="block_brand" class="well_family_head filter_value" align="center">
+							<strong>Виробники</strong>
 						</div>
-						<%if (@select_start_price.empty? == false and @select_start_price != nil) or (@select_finish_price.empty? == false and @select_finish_price != nil)%>
-								<div id="remove_price_range" class="row_fluid">
-									<div class="span22 wrap_value">
-										<%if @select_start_price != ""%>від <%=@select_start_price%><%end%> 
-										<%if @select_finish_price !=  ""%>до <%=@select_finish_price%><%end%> грн.
-									</div>
-									<div class="span2">
-										<a onclick="remove_selected('remove_price_range','price_range')"><i class="icon-remove"></i></a>
-									</div>
-									<input name="tyre_start_price_selected" type="hidden" value="<%=@select_start_price%>">
-									<input name="tyre_finish_price_selected" type="hidden" value="<%=@select_finish_price%>">
+						<%if @select_brands.empty? == false and @select_brands != nil%>
+							<%@select_brands.each_index do |brand_index|%>
+							<div id="<%='remove_brand_'+brand_index.to_s%>" class="row_fluid filter_value">
+								<div class="span22 wrap_value">
+									<%=@select_brands[brand_index]%>	
 								</div>
+								<div class="span2">
+									<a onclick="remove_selected('<%='remove_brand_'+brand_index.to_s%>','brand')"><i class="icon-remove"></i></a>
+								</div>
+								<input name="tyre_brand_selected[]" type="hidden" value="<%=@select_brands[brand_index].gsub(/\"/, "&quot;")%>"><br>
+							</div>
+							<%end%>
 						<%else%>
-							<div name="no_price_range" align="center">всі</div>	
+							<div name="no_brand" align="center">всі</div>	
 						<%end%>
-					</div>
+				</div>
+					
 				</div>
 				<div class="row-fluid">
 					<div class="span5">
@@ -742,43 +742,15 @@
 						<input id="tyre_remain_typeahead" name="tyre_remain_typeahead" type="text" class="input-block-level focus_element" autocomplete="off" data-provide="typeahead" placeholder="Вкажіть кількість..." style="font-size: 12px;" tabindex="6">
 					</div>
 					<div class="span5">
-						<div class="row-fluid">
-							<div class="span9">
-								<input id="tyre_start_price_input" name="tyre_start_price_input" type="text" autocomplete="off" class="input-block-level focus_element" style="font-size: 12px;" placeholder="від..." tabindex="7">
-							</div>
-							<div class="span2" align="center"><i class="icon-minus"></i></div>
-							<div class="span9">	
-								<input id="tyre_finish_price_input" name="tyre_finish_price_input" type="text" autocomplete="off" class="input-block-level focus_element" style="font-size: 12px;" placeholder="до..." tabindex="8">
-							</div>
-							<div class="span4" align="center"><button id="price_range_ok_button" class="btn input-block-level focus_element" type="button" tabindex="9"><i class="icon-ok"></i></button></div>
-						</div>
+						<input id="tyre_brand_typeahead" name="tyre_brand_typeahead" class="input-block-level focus_element" type="text" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;">
 					</div>
+					
 				
 				</div>
 
 				<div id="hidden_filter_items" hidden="hidden">
 					<div class="row-fluid">
-				
-						<div class="span5 well_family">
-							<div id="block_brand" class="well_family_head filter_value" align="center">
-								<strong>Виробники</strong>
-							</div>
-							<%if @select_brands.empty? == false and @select_brands != nil%>
-								<%@select_brands.each_index do |brand_index|%>
-								<div id="<%='remove_brand_'+brand_index.to_s%>" class="row_fluid filter_value">
-									<div class="span22 wrap_value">
-										<%=@select_brands[brand_index]%>	
-									</div>
-									<div class="span2">
-										<a onclick="remove_selected('<%='remove_brand_'+brand_index.to_s%>','brand')"><i class="icon-remove"></i></a>
-									</div>
-									<input name="tyre_brand_selected[]" type="hidden" value="<%=@select_brands[brand_index].gsub(/\"/, "&quot;")%>"><br>
-								</div>
-								<%end%>
-							<%else%>
-								<div name="no_brand" align="center">всі</div>	
-							<%end%>
-						</div>
+
 						<div class="span5 well_family">
 							<div id="block_family" class="well_family_head filter_value" align="center">
 								<strong>Марки</strong>
@@ -819,6 +791,26 @@
 								<div name="no_supplier" align="center">всі</div>	
 							<%end%>
 						</div>
+						<div class="span5 well_family">
+							<div id="block_price_range" class="well_family_head" align="center">
+								<strong>Діапазон цін</strong>
+							</div>
+							<%if (@select_start_price.empty? == false and @select_start_price != nil) or (@select_finish_price.empty? == false and @select_finish_price != nil)%>
+									<div id="remove_price_range" class="row_fluid">
+										<div class="span22 wrap_value">
+											<%if @select_start_price != ""%>від <%=@select_start_price%><%end%> 
+											<%if @select_finish_price !=  ""%>до <%=@select_finish_price%><%end%> грн.
+										</div>
+										<div class="span2">
+											<a onclick="remove_selected('remove_price_range','price_range')"><i class="icon-remove"></i></a>
+										</div>
+										<input name="tyre_start_price_selected" type="hidden" value="<%=@select_start_price%>">
+										<input name="tyre_finish_price_selected" type="hidden" value="<%=@select_finish_price%>">
+									</div>
+							<%else%>
+								<div name="no_price_range" align="center">всі</div>	
+							<%end%>
+						</div>
 						<div class="span4 well_family">
 							<div id="block_date" class="well_family_head" align="center">
 								<strong>Прайс від дати</strong>
@@ -840,15 +832,23 @@
 
 					</div>	
 					<div class="row-fluid">
-				
-						<div class="span5">
-							<input id="tyre_brand_typeahead" name="tyre_brand_typeahead" class="input-block-level hidden_focus_element" type="text" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;">
-						</div>
 						<div class="span5">
 							<input id="tyre_family_typeahead" name="tyre_family_typeahead" class="input-block-level hidden_focus_element" autocomplete="off" type="text" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;">
 						</div>
 						<div class="span5">
 							<input id="tyre_supplier_typeahead" name="tyre_supplier_typeahead" type="text" class="input-block-level hidden_focus_element" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;">
+						</div>
+						<div class="span5">
+							<div class="row-fluid">
+								<div class="span9">
+									<input id="tyre_start_price_input" name="tyre_start_price_input" type="text" autocomplete="off" class="input-block-level hidden_focus_element" style="font-size: 12px;" placeholder="від..." tabindex="7">
+								</div>
+								<div class="span2" align="center"><i class="icon-minus"></i></div>
+								<div class="span9">	
+									<input id="tyre_finish_price_input" name="tyre_finish_price_input" type="text" autocomplete="off" class="input-block-level hidden_focus_element" style="font-size: 12px;" placeholder="до..." tabindex="8">
+								</div>
+								<div class="span4" align="center"><button id="price_range_ok_button" class="btn input-block-level hidden_focus_element" type="button" tabindex="9"><i class="icon-ok"></i></button></div>
+							</div>
 						</div>
 						<div class="span4">
 							<div class="row-fluid input-append date hidden_focus_element" id="datepicker"  data-date-format="dd/mm/yyyy">
