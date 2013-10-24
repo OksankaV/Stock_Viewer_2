@@ -30,7 +30,7 @@
 				{separator: true},
 				{name: 'Видалити вибрані замовлення', bimage: '/images/delete-icon.png', onpress: delete_selected_orders},
 				{separator: true},
-				{name: 'Редагувати замовлення', bimage: '/images/edit-icon.png', onpress: edit_order},
+				{name: 'Редагувати замовлення', bimage: '/images/edit-icon.png', onpress: edit_order_in_table},
 				{separator: true},
 				{name: 'Переглянути список покупців', bimage: '/images/users-icon.png', onpress: buyer_list},
 				{separator: true}
@@ -64,17 +64,21 @@
 		{	
 			$('#add_order_link').click();
 		}		
-
-		function edit_order(com, grid) 
+		
+		function edit_order_in_table(com, grid)
 		{
-			if ($('.trSelected', grid).length == '0')
+			edit_order($('.trSelected', grid));
+		}
+
+		function edit_order(edit_object) 
+		{
+			if (edit_object.length == '0')
 			{
 				alert('На вибрано жодного замовлення.');
 			}
-			else if ($('.trSelected', grid).length == '1')
+			else if (edit_object.length == '1')
 			{
-				var items = $('.trSelected',grid);
-				var edit_item = items[0].id;
+				var edit_item = edit_object.attr("id");
 				$.get("/edit_modal_form",
                 	{item: edit_item},
                 	function(data) {$('#edit_order_modal .modal-body').html(data)}
@@ -242,6 +246,10 @@
 			$('#add_buyer_link').click();
 		});
 			
+		$("#orders_table").delegate('tr','dblclick', function (e) {
+			$(this).addClass('trSelected');
+			edit_order($(this));
+		});
 		
 	});
 		
