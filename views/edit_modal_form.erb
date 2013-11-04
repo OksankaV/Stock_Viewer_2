@@ -62,7 +62,7 @@
 				<div class="offset1 span6 bgcolor"><br>
 					<div class="controls span24">
 					<label class="checkbox ">
-						<input type="checkbox" id="edit_payed_by_buyer" name="edit_payed_by_buyer" <%if @edit_data_hash['payed_by_buyer'] == "on"%>checked<%end%>> <%=Orders_table_headers['payed_by_buyer']%>
+						<input type="checkbox" id="edit_payed_by_buyer" name="edit_payed_by_buyer" <%if @edit_data_hash['payed_by_buyer'] == 1%>checked<%end%>> <%=Orders_table_headers['payed_by_buyer']%>
 					</label>
 
 					</div>
@@ -71,14 +71,14 @@
 				<div class="span6 bgcolor"><br>
 					<div class="controls span24">
 					<label class="checkbox ">
-						<input type="checkbox" id="edit_payed_by_us" name="edit_payed_by_us" <%if @edit_data_hash['payed_by_us'] == "on"%>checked<%end%>> <%=Orders_table_headers['payed_by_us']%>
+						<input type="checkbox" id="edit_payed_by_us" name="edit_payed_by_us" <%if @edit_data_hash['payed_by_us'] == 1%>checked<%end%>> <%=Orders_table_headers['payed_by_us']%>
 					</label>
 					</div>
 				</div>
 
 				<div class="span6 bgcolor"><br>
 					<label class="checkbox inline">
-						<input type="checkbox" id="edit_cash_flag" name="edit_cash_flag" <%if @edit_data_hash['cash_flag'] == "on"%>checked<%end%>> <%=Orders_table_headers['cash_flag']%>
+						<input type="checkbox" id="edit_cash_flag" name="edit_cash_flag" <%if @edit_data_hash['cash_flag'] == 1%>checked<%end%>> <%=Orders_table_headers['cash_flag']%>
 					</label>
 				</div>
 			</div>

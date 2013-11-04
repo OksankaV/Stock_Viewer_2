@@ -25,7 +25,7 @@ end
 
 
 Title = "VSIKOLESA"
-Price_table_headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова ціна з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
+Price_table_headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
 Price_table_columns = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe']
 Show_data_field = ['id','brand', 'family', 'dimensiontype', 'sidewall', 'origin', 'runflat', 'productiondate', 'season', 'bp', 'remain', 'supplier', 'rp', 'sp', 'suppliercomment', 'bpvat', 'actualdate', 'sourcestring']
 Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'season' => 'Сезон', 'dimensiontype' => 'Типорозмір', 'bp' => 'Гуртова ціна', 'rp' => 'Роздрібна ціна'}
@@ -1351,9 +1351,9 @@ post '/edit_order' do
 			input_params_hash[param_key] = "" if input_param_value == nil
 		end
 		input_params_hash[:issued] = Time.now.strftime("%Y-%m-%d %H:%M:%S")
-		input_params_hash[:payed_by_buyer] = boolean_hash_check(params,"input_payed_by_buyer")
-		input_params_hash[:payed_by_us] = boolean_hash_check(params,"input_payed_by_us")
-		input_params_hash[:cash_flag] = boolean_hash_check(params,"input_cash_flag")
+		input_params_hash[:payed_by_buyer] = boolean_hash_check(params,"edit_payed_by_buyer")
+		input_params_hash[:payed_by_us] = boolean_hash_check(params,"edit_payed_by_us")
+		input_params_hash[:cash_flag] = boolean_hash_check(params,"edit_cash_flag")
 
 		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id, cash_flag=:cash_flag WHERE id=:id", input_params_hash)
 		redirect('/orders')
@@ -1366,8 +1366,11 @@ post '/add_new_order' do
 		input_params_hash = {}
 		params.each_pair do |input_param_key, input_param_value|
 			input_params_hash[input_param_key] = input_param_value
+			input_params_hash[input_param_key] = 1 if input_param_value == "on"
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
+		p "kkkkkkkkkkkkkkkkkkkkkkkkk"
+		p input_params_hash
 		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, rate, outprice, transfered, transferprice, payed_by_buyer, payed_by_us, status, bank, sent, track_id, cash_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d %H:%M:%S"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"], input_params_hash["input_rate"], input_params_hash["input_outprice"], input_params_hash["input_transfered"].to_i, input_params_hash["input_transferprice"].to_i, input_params_hash["input_payed_by_buyer"], input_params_hash["input_payed_by_us"], input_params_hash["input_status"], input_params_hash["input_bank"], input_params_hash["input_sent"],input_params_hash["input_track_id"],input_params_hash["input_cash_flag"]])
 		redirect('/orders')
 	end
