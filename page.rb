@@ -357,6 +357,37 @@ get '/' do
 		@admin_filter_page = true
 		erb :filter
 	else
+		@checked_array = []
+		add_to_checked_array(@select_sizes,"size[]")
+		add_to_checked_array(@select_brands,"brand[]")
+		add_to_checked_array(@select_families,"family[]")
+		add_to_checked_array(@select_diameters,"diameter[]")
+		add_to_checked_array(@select_suppliers,"supplier[]")
+		add_to_checked_array(@select_seasons,"season[]")
+		if @select_date.empty? == false
+			hash = {}
+			hash['name'] = "date"
+			hash['value'] = @select_date
+			@checked_array.push(hash)
+		end	
+		if @select_remain.empty? == false
+			hash = {}
+			hash['name'] = "remain"
+			hash['value'] = @select_remain
+			@checked_array.push(hash)
+		end
+		if @select_start_price.empty? == false
+			hash = {}
+			hash['name'] = "start_price"
+			hash['value'] = @select_start_price
+			@checked_array.push(hash)
+		end
+		if @select_finish_price.empty? == false
+			hash = {}
+			hash['name'] = "finish_price"
+			hash['value'] = @select_finish_price
+			@checked_array.push(hash)
+		end
 		@admin_filter_page = false
 		erb :filter
 	end 
@@ -496,8 +527,6 @@ get '/table' do
 	
 	all_data_array = []
 	show_data_array = []
-	p "-----------------"
-	p select_string
 	select_all_data = $db.execute(select_string, @bind_hash)
 	select_all_data.each do |one_row_data|
 		data_hash = {}
@@ -545,7 +574,7 @@ get '/table' do
 		end
 	end
 	
-	
+		
 	return (JSON.pretty_generate(show_data_array))
 
 end
@@ -655,12 +684,11 @@ post '/table_selected_items' do
     select_start_price = "" if select_start_price == nil
     select_finish_price = params[:finish_price]
     select_finish_price = "" if select_finish_price == nil 
-    p params
-    
+
 	@checked_id_array = params[:checked_id]
 	@checked_id_array = [] if @checked_id_array == nil 	
 	@checked_brand_array = params[:checked_brand]
-	@checked_brand_array = [] if @checked_brand_array == nil 	
+	@checked_brand_array = [] if @checked_brand_array == nil
 	@bind_hash = {}
     sortname_column = params[:sortname]
     sortorder_value = params[:sortorder]
@@ -670,8 +698,10 @@ post '/table_selected_items' do
     sortorder_value = params[:sortorder]
     
     select_string = "select * from price where"
+    
+    if (@checked_brand_array.empty? == false && admin?) || (@checked_brand_array.empty? && admin? == false)
 
-    if @checked_brand_array.empty? == false
+    if select_sizes.empty? == false
     	select_string = select_string + " ( "
 		i=0
 		select_sizes.each do |tyre_sizes_check|
@@ -766,41 +796,61 @@ post '/table_selected_items' do
 			@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
 		end
     	
-		select_string = select_string + " and ( "
-		i = 0
-		@checked_brand_array.each do |checked_brand|
-			if i == 0
-				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
-			else
-				select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+    	if admin?
+			select_string = select_string + " and ( "
+			i = 0
+			@checked_brand_array.each do |checked_brand|
+				if i == 0
+					select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+				else
+					select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+				end
+				i += 1
 			end
-			i += 1
-		end
-		select_string =  select_string + " ) "
-	end
-    	
-	if @checked_id_array.empty? == false
-		if @checked_brand_array.empty? == false
-			select_string = select_string + " or ( "
+			select_string =  select_string + " ) "
 		else
-			select_string = select_string + " ( "
-		end
-		i = 0
-		@checked_id_array.each do |checked_id|
+			if select_brands.empty? == false
+				select_string = select_string + " and ( "
+				i = 0
+				select_brands.each do |select_brand|
+					if i == 0
+						select_string = filter_select(select_string, select_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+					else
+						select_string = filter_select(select_string, select_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+					end
+					i += 1
+				end
+				select_string =  select_string + " ) "
+			end		
+		end	
+	end
+	end
+    
+    if admin?
+    	protected!
+
+		if @checked_id_array.empty? == false
+			if @checked_brand_array.empty? == false
+				select_string = select_string + " or ( "
+			else
+				select_string = select_string + " ( "
+			end
+			i = 0
+			@checked_id_array.each do |checked_id|
 				if i == 0
 					@bind_hash[("id" + i.to_s).to_sym] = checked_id
 					select_string = select_string + "id = :id" + i.to_s
 				else
 					@bind_hash[("id" + i.to_s).to_sym] = checked_id
-					select_string = select_string + " or id = :id" + i.to_s
+						select_string = select_string + " or id = :id" + i.to_s
 				end
 				i += 1
 			end
 			select_string =  select_string + " ) "
 		end
+	end
 
 	select_count = select_string.gsub(/\*/,"count(*)")
-	
 	rows_count = $db.execute(select_count, @bind_hash).flatten
 	@select_string_to_excel = select_string
 	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i.to_i
@@ -884,6 +934,8 @@ post '/table_selected_items' do
 
 	return (JSON.pretty_generate(select_data))
 end
+
+
 
 
 get '/models' do
@@ -989,8 +1041,8 @@ post '/excel_file' do
 		end
 
 		select_string = "select * from price where"
-
-		if checked_brands.empty? == false
+		if (checked_brands.empty? == false && admin?) || (checked_brands.empty? && admin? == false)
+		if select_sizes.empty? == false
 			select_string = select_string + " ( "
 			i=0
 			select_sizes.each do |tyre_sizes_check|
@@ -1069,17 +1121,33 @@ post '/excel_file' do
 				@bind_hash["date".to_sym] = Time.gm(date[2],date[1],date[0]).strftime("%Y-%m-%d %H:%M:%S")
 			end
 			
-			select_string = select_string + " and ( "
-			i = 0
-			checked_brands.each do |checked_brand|
-				if i == 0
-					select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
-				else
-					select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+			if admin?
+				select_string = select_string + " and ( "
+				i = 0
+				checked_brands.each do |checked_brand|
+					if i == 0
+						select_string = filter_select(select_string, checked_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+					else
+						select_string = filter_select(select_string, checked_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+					end
+					i += 1
 				end
-				i += 1
-			end
-			select_string =  select_string + " ) "
+				select_string =  select_string + " ) "
+			else
+				if select_brands.empty? == false
+					select_string = select_string + " and ( "
+					i = 0
+					select_brands.each do |select_brand|
+						if i == 0
+							select_string = filter_select(select_string, select_brand, $tyre_brand_name, "brand = :brand" + i.to_s, "brand" + i.to_s)
+						else
+							select_string = filter_select(select_string, select_brand, $tyre_brand_name, " or brand = :brand" + i.to_s, "brand" + i.to_s)
+						end
+						i += 1
+					end
+					select_string =  select_string + " ) "
+				end		
+			end	
 		end
 			
 		if checked_ids.empty? == false
@@ -1101,6 +1169,7 @@ post '/excel_file' do
 			end
 			select_string =  select_string + " ) "
 		end
+		end
 	else
 		select_string = "select * from price where ("
 		i = 0
@@ -1115,7 +1184,8 @@ post '/excel_file' do
 				i += 1
 			end
 		select_string =  select_string + " ) "	
-	end		
+	end
+			
 
 	all_data_array = []
 	select_all_data = $db.execute(select_string, @bind_hash)
@@ -1198,9 +1268,9 @@ post '/excel_file' do
 				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'], row_hash['supplier'], row_hash['suppliercomment'], row_hash['rp'], row_hash['bp'], row_hash['sp'], row_hash['bpvat'], row_hash['actualdate'], row_hash['sourcestring']], :style => default  
 			end
 		else
-			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['actualdate']], :style => header
+			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['origin'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['bp'], Price_table_headers['actualdate']], :style => header
 			all_data_array.each do |row_hash|
-				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['actualdate']], :style => default 
+				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['origin'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['bp'], row_hash['actualdate']], :style => default 
 			end
 		end 
 
@@ -1369,8 +1439,6 @@ post '/add_new_order' do
 			input_params_hash[input_param_key] = 1 if input_param_value == "on"
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
-		p "kkkkkkkkkkkkkkkkkkkkkkkkk"
-		p input_params_hash
 		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, rate, outprice, transfered, transferprice, payed_by_buyer, payed_by_us, status, bank, sent, track_id, cash_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d %H:%M:%S"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"], input_params_hash["input_rate"], input_params_hash["input_outprice"], input_params_hash["input_transfered"].to_i, input_params_hash["input_transferprice"].to_i, input_params_hash["input_payed_by_buyer"], input_params_hash["input_payed_by_us"], input_params_hash["input_status"], input_params_hash["input_bank"], input_params_hash["input_sent"],input_params_hash["input_track_id"],input_params_hash["input_cash_flag"]])
 		redirect('/orders')
 	end

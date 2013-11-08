@@ -2,6 +2,58 @@
 	<script type="text/javascript">
 
 	$(document).ready(function() {
+	
+	
+		<%if @admin_filter_page == false%>
+		
+		$("#select_items_table").flexigrid({
+			url: '/table_selected_items?<%=@table_url%>',
+			dataType: "json",
+			colModel : [
+				{display: "<%=Price_table_headers['brand']%>", name : 'brand', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['family']%>", name : 'family', width : 180, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['dimensiontype']%>", name : 'dimensiontype', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['origin']%>", name : 'origin', width : 100, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['productiondate']%>", name : 'productiondate', width : 40, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['season']%>", name : 'season', width : 40, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['remain']%>", name : 'remain', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['suppliercomment']%>", name : 'suppliercomment', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['bp']%>", name : 'bp', width : 100, sortable : true, align: 'left'},
+				{display: "<%=Price_table_headers['actualdate']%>", name : 'actualdate', width : 70, sortable : true, align: 'left'}
+			],			
+			sortname: "rp",
+			sortorder: "asc",
+			usepager: true,
+			useRp: true,
+			rp: 100,
+			showTableToggleBtn: true,
+			width: setWidth(),
+			height: setHeight()
+		});
+		var itemlist = new Array();
+		$("#select_items_table").delegate('tr','click', function (e) {
+			if ($(this).hasClass("trSelected") == true)
+				itemlist.push($(this).attr("id"));
+			else
+				itemlist.pop();
+			if (itemlist.length == 0)
+				$("#excel_button").find("span").text("Зберегти все у Excel-файл");
+			else 
+				$("#excel_button").find("span").text("Зберегти вибране у Excel-файл");
+		});
+		
+		$("#excel_button").click(function(){
+			if (itemlist.length == 0)
+				$("#excel_button_selected").val("");
+			else
+				$("#excel_button_selected").val(itemlist);
+		});		
+		<%end%>
+
+
+
+
+
 
 	
 		$('#tyre_brand_typeahead').typeahead({
@@ -244,11 +296,11 @@
 
 		$('body').attr('style','margin-top:'+$(".navbar").outerHeight(true)+'px;');
 		$('#filter_form').attr('style','padding-top: 10px; margin-bottom: 0px; padding-bottom: 11px;');
-		set_filter_form_height();
+		
 		
 		
 		<%if @admin_filter_page == true%>
-		
+		set_filter_form_height();
 		$(".hidden_focus_element").keypress(function(event) {
 			if ((event.which == 13) && ($(this).val() == "") && ($(this).attr("id") != "datepicker"))
 			{	
@@ -348,9 +400,17 @@
 			$('#search_button').addClass("btn-primary");
 			if ($('#block_size').parent().find('div[id^="remove_"]').length == 0)
 			{
-				$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%if admin?%>
+					$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%else%>
+					$('#table_div').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%end%>
 			} else {	
-				$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%if admin?%>
+					$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%else%>
+					$('#table_div').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%end%>
 			}
 		});
 			
@@ -358,20 +418,29 @@
 			$('#search_button').addClass("btn-primary");
 			if ($('#block_size').parent().find('div[id^="remove_"]').length == 0)
 			{
-				$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%if admin?%>
+					$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%else%>
+					$('#table_div').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%end%>
 			} else {	
-				$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%if admin?%>
+					$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%else%>
+					$('#table_div').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%end%>
 			}
 			focus_next($(this).attr("id"));
 		});
 			
 	});
 	
-		
+		<%if admin?%>
 		function set_filter_form_height() {
 			$('#select_items_form').attr('style','margin-top:'+$("#filter_form").outerHeight(true)+'px;');
 			$('.accordion').attr('style','padding-top:'+$(".fixed2").outerHeight(true)+'px; margin-top:-1px;');
 		}
+		<%end%>
 		
 		function focus_next(item_id){
 			var current_tabindex = $('[id=' + item_id + ']').attr('tabindex');
@@ -438,8 +507,9 @@
 					$('div[id="block_' + id_part + '"]').parent().find('div[name="no_' + id_part + '"]').remove();
 					$('div[id="block_' + id_part + '"]').parent().find('div.filter_value:last').after('<div id="remove_' + id_part + '_' + index + '" class="row_fluid filter_value"><div class="span22 wrap_value">'+ value +'</div><div class="span2"><a onclick=remove_selected("remove_' + id_part + '_' + index + '","' + id_part + '")><i class="icon-remove"></i></a></div><input name="tyre_' + id_part + '_selected[]" type="hidden" value="' + value + '"></div>');
 			}
-
+			<%if admin?%>
 			set_filter_form_height();
+			<%end%>
 			if (id_part != "season")
 				focus_next('tyre_' + id_part + '_typeahead');
 
@@ -451,10 +521,18 @@
 				$('button[id="'+season_name+'"]').removeAttr('style');
 			$('#search_button').addClass("btn-primary");
 			if ($('#block_size').parent().find('div[id^="remove_"]').length == 0)
-				$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
-			else	
-				$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
-					
+			{	<%if admin?%>
+					$('#select_items_form').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%else%>
+					$('#table_div').html("<div id='message_id' class='alert alert-info' align='center'><strong>Для пошуку даних обов'язково введіть параметр Ширина/Висота</strong></div>");
+				<%end%>
+			} else {
+				<%if admin?%>
+					$('#select_items_form').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%else%>
+					$('#table_div').html('<div id="message_id" class="alert alert-info" align="center"><strong>Для відображення елементів натисніть ПОШУК.	</strong></div>');
+				<%end%>
+			}		
 			if ($('div[id="block_' + id_part + '"]').parent().find('div[id^="remove_"]').length == 0)
 			{
 				if (id_part == 'size')
@@ -470,7 +548,7 @@
 		}
 
 		function setHeight(){
-			var value_height = $(window).height() - $("#filter_form").outerHeight(true) - 100;
+			var value_height = $(window).height() - $("#filter_form").outerHeight(true) - 200;
 			return value_height
 		}
 
@@ -482,23 +560,28 @@
 			$("#select_items_form").submit();
 		}
 		
+		
 		function validate_filter_form() {
-
-			if (($('#tyre_start_price_input').val().match(/[^0-9]/g)) || ($('#tyre_finish_price_input').val().match(/[^0-9]/g)))
-			{
-				alert("Діапазон цін повинен містити тільки цифри.");
-				return false;	
-			}
-			else if (parseInt($('#tyre_start_price_input').val()) > parseInt($('#tyre_finish_price_input').val()))
-			{
-				alert("Початкова ціна не може перевищувати кінцеву.");
-				return false;	
-			}
-			else
-			{
+			<%if admin?%>
+				if (($('#tyre_start_price_input').val().match(/[^0-9]/g)) || ($('#tyre_finish_price_input').val().match(/[^0-9]/g)))
+				{
+					alert("Діапазон цін повинен містити тільки цифри.");
+					return false;	
+				}
+				else if (parseInt($('#tyre_start_price_input').val()) > parseInt($('#tyre_finish_price_input').val()))
+				{
+					alert("Початкова ціна не може перевищувати кінцеву.");
+					return false;	
+				}
+				else
+				{
+					submit_filter_form();
+				}
+			<%else%>
 				submit_filter_form();
-			}	
+			<%end%>		
 		}
+		
 	
 	</script>
 	
@@ -611,11 +694,14 @@
 		.btn-margin{
 			margin: 5px 0px;
 		}
+		#excel_button{
+			font-weight: bold;
+		}
 		
 	</style>
 <%end%>
 	
-	<div class="fixed span24"> 
+	<div class="span24"> 
 	<form method="GET" id="filter_form" action="">
 		<div class="row-fluid">
 			<div class="span20">
@@ -881,9 +967,10 @@
 		<input id="press_reset_button" name="press_reset_button" type="hidden" value="false">
 	
 		</form>
-	</div>	
-
+	</div>
 	
+	<%if admin?%>
+
 		<form id="select_items_form" method="POST" action="/selected_items">
 		<%if @select_sizes.empty? == false and @select_sizes != nil and @press_submit_button == true%>
 			<div id="show_data_table">
@@ -987,4 +1074,26 @@
     		</div>
 		<%end%>
 		</form>
+	<%else%>
+	<div class="span24">
+		<%if @show_table%>
+			<div id="table_div">
+			<table id="select_items_table"></table>
+				<div class="row-fluid">
+					<div class="back_button span24" align="center">
+						<form action="/excel_file" method="POST">
+							<button class="btn" id="excel_button" type="submit"><i class="icon-file"></i><span>Зберегти все у Excel-файл</span></button>
+							<input type="hidden" id="excel_button_all" name="excel_button_all" value='<%=@checked_array.to_json%>'>
+							<input type="hidden" id="excel_button_selected" name="excel_button_selected" value="">
+						</form>	
+					</div>
+				</div>
+			</div>	
+		<%else%>
+			<div id="message_id" class="alert alert-info" align="center">
+				<strong><%=@message%></strong>
+    		</div>
+		<%end%>
+	</div>	
+	<%end%>	
 
