@@ -73,9 +73,13 @@
 			else
 				itemlist.pop();
 			if (itemlist.length == 0)
-				$("#excel_button").find("strong").text("Зберегти все у Excel-файл");
-			else 
-				$("#excel_button").find("strong").text("Зберегти вибране у Excel-файл");
+			{
+				$("#excel_button").find("strong").text("Зберегти все у Excel-файл (спрощений)");
+				$("#advanced_excel_button").find("strong").text("Зберегти все у Excel-файл (розширений)");
+			} else { 
+				$("#excel_button").find("strong").text("Зберегти вибране у Excel-файл (спрощений)");
+				$("#advanced_excel_button").find("strong").text("Зберегти вибране у Excel-файл (розширений)");
+			}	
 		});
 		
 		$("#excel_button").click(function(){
@@ -83,9 +87,17 @@
 				$("#excel_button_selected").val("");
 			else
 				$("#excel_button_selected").val(itemlist);
-		});		
+			$("#advanced_excel_print").val("false");	
+		});
 		
-
+		$("#advanced_excel_button").click(function(){
+			if (itemlist.length == 0)
+				$("#excel_button_selected").val("");
+			else
+				$("#excel_button_selected").val(itemlist);
+			$("#advanced_excel_print").val("true");	
+		});
+		
 	});
 	
 
@@ -154,9 +166,11 @@
 			<div class="back_button span24" align="center">
 				<form action="/excel_file" method="POST">
 					<button class="btn" id="back_button" ><i class="icon-arrow-left"></i> <strong>Повернутися до фільтру</strong></button>
-					<button class="btn" id="excel_button" type="submit"><i class="icon-file"></i><strong> Зберегти все у Excel-файл</strong></button>
+					<button class="btn" id="excel_button" type="submit"><i class="icon-file"></i><strong> Зберегти все у Excel-файл (спрощений)</strong></button>
+					<button class="btn" id="advanced_excel_button" type="submit"><i class="icon-file"></i><strong> Зберегти все у Excel-файл (розширений)</strong></button>
 					<input type="hidden" id="excel_button_all" name="excel_button_all" value='<%=@checked_array.to_json%>'>
 					<input type="hidden" id="excel_button_selected" name="excel_button_selected" value="">
+					<input type="hidden" id="advanced_excel_print" name="advanced_excel_print" value="">
 				</form>	
 			</div>
 		</div>

@@ -32,10 +32,10 @@ Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'seas
 Seasons = ["-", "літо", "зима", "в/c"]
 Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
-Orders_table_headers = {'issued' =>'Дата введення','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна','rate' => 'Курс', 'outprice' => 'Вихідна ціна', 'transfered' => 'Переказано', 'transferprice' => 'Ціна доставки', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Дата відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'notes' => 'Нотатки'}
-Buyers_table_headers = {'buyer' =>'Покупець', 'notes' => 'Нотатки'}
-Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'notes']
-Buyers_table_columns = ['buyer','notes']
+Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Дата відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця'}
+Buyers_table_headers = {'buyer' =>'Покупець', 'buyer_notes' => 'Нотатки'}
+Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'order_notes', 'buyer_notes']
+Buyers_table_columns = ['buyer','buyer_notes']
 Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
 def select_data_from_db()
@@ -71,8 +71,8 @@ def select_data_from_db()
 end
 
 def select_data_from_orders_db()
-	if File.exists?("orders.db")
-		$db_orders = SQLite3::Database.new("orders.db")
+	if File.exists?("data/orders.db")
+		$db_orders = SQLite3::Database.new("data/orders.db")
 		$db_orders.execute("PRAGMA foreign_keys = ON;")
 	end	
 end
@@ -206,7 +206,7 @@ get '/' do
 	else	
 		@table_href += "&finish_price=" + @select_finish_price
 	end	
-	#make_href(@select_brands,"&brand","&brand[]")
+	make_href(@select_brands,"&brand","&brand[]")
 	make_href(@select_families,"&family","&family[]")
 	make_href(@select_sizes,"&size","&size[]")
 	make_href(@select_diameters,"&diameter","&diameter[]")
@@ -995,6 +995,7 @@ get('/logout'){ response.set_cookie(settings.username, false) ; redirect '/' }
 post '/excel_file' do
 	@bind_hash = {}
 	select_params = JSON.parse(params[:excel_button_all])
+	advanced_excel_print = params[:advanced_excel_print]
 	select_row_id_array = params[:excel_button_selected].gsub(/row/,"").split(',')
 	if select_row_id_array == []
 		checked_brands = []
@@ -1263,14 +1264,21 @@ post '/excel_file' do
 	  wb.add_worksheet(:name => 'price') do  |ws|
 		if admin?
 			protected!
-			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'], Price_table_headers['supplier'], Price_table_headers['suppliercomment'], Price_table_headers['rp'], Price_table_headers['bp'], Price_table_headers['sp'], Price_table_headers['bpvat'], Price_table_headers['actualdate'], Price_table_headers['sourcestring']], :style => header
-			all_data_array.each do |row_hash|
-				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'], row_hash['supplier'], row_hash['suppliercomment'], row_hash['rp'], row_hash['bp'], row_hash['sp'], row_hash['bpvat'], row_hash['actualdate'], row_hash['sourcestring']], :style => default  
-			end
+			if advanced_excel_print == "true"
+				ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['sidewall'], Price_table_headers['origin'], Price_table_headers['runflat'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'], Price_table_headers['supplier'], Price_table_headers['suppliercomment'], Price_table_headers['rp'], Price_table_headers['bp'], Price_table_headers['sp'], Price_table_headers['bpvat'], Price_table_headers['actualdate'], Price_table_headers['sourcestring']], :style => header
+				all_data_array.each do |row_hash|
+					ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['sidewall'], row_hash['origin'], row_hash['runflat'], row_hash['productiondate'], row_hash['season'], row_hash['remain'], row_hash['supplier'], row_hash['suppliercomment'], row_hash['rp'], row_hash['bp'], row_hash['sp'], row_hash['bpvat'], row_hash['actualdate'], row_hash['sourcestring']], :style => default  
+				end
+			else
+				ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['origin'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['rp'], Price_table_headers['actualdate']], :style => header
+				all_data_array.each do |row_hash|
+					ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['origin'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['rp'], row_hash['actualdate']], :style => default 
+				end	
+			end	
 		else
-			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['origin'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['bp'], Price_table_headers['actualdate']], :style => header
+			ws.add_row [Price_table_headers['brand'], Price_table_headers['family'], Price_table_headers['dimensiontype'], Price_table_headers['origin'], Price_table_headers['productiondate'], Price_table_headers['season'], Price_table_headers['remain'],Price_table_headers['suppliercomment'], Price_table_headers['rp'], Price_table_headers['actualdate']], :style => header
 			all_data_array.each do |row_hash|
-				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['origin'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['bp'], row_hash['actualdate']], :style => default 
+				ws.add_row [row_hash['brand'], row_hash['family'], row_hash['dimensiontype'], row_hash['origin'], row_hash['productiondate'], row_hash['season'], row_hash['remain'],row_hash['suppliercomment'], row_hash['rp'], row_hash['actualdate']], :style => default 
 			end
 		end 
 
@@ -1413,19 +1421,19 @@ post '/edit_order' do
 		input_params_hash = {}
 		params.each_pair do |input_param_key, input_param_value|
 			param_key = input_param_key.gsub(/edit_/,"").to_sym
-			if (param_key == :transfered) || (param_key == :transferprice) || (param_key == :status)|| (param_key == :id)
+			if (param_key == :status)|| (param_key == :id)
 				input_params_hash[param_key] = input_param_value.to_i
 			else
 				input_params_hash[param_key] = input_param_value
 			end	
 			input_params_hash[param_key] = "" if input_param_value == nil
 		end
-		input_params_hash[:issued] = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+		input_params_hash[:issued] = Time.now.strftime("%d.%m.%Y")
 		input_params_hash[:payed_by_buyer] = boolean_hash_check(params,"edit_payed_by_buyer")
 		input_params_hash[:payed_by_us] = boolean_hash_check(params,"edit_payed_by_us")
 		input_params_hash[:cash_flag] = boolean_hash_check(params,"edit_cash_flag")
 
-		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id, cash_flag=:cash_flag WHERE id=:id", input_params_hash)
+		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id,  cash_flag=:cash_flag, notes=:order_notes WHERE id=:id", input_params_hash)
 		redirect('/orders')
 	end
 end
@@ -1439,7 +1447,8 @@ post '/add_new_order' do
 			input_params_hash[input_param_key] = 1 if input_param_value == "on"
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
-		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, rate, outprice, transfered, transferprice, payed_by_buyer, payed_by_us, status, bank, sent, track_id, cash_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d %H:%M:%S"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"], input_params_hash["input_rate"], input_params_hash["input_outprice"], input_params_hash["input_transfered"].to_i, input_params_hash["input_transferprice"].to_i, input_params_hash["input_payed_by_buyer"], input_params_hash["input_payed_by_us"], input_params_hash["input_status"], input_params_hash["input_bank"], input_params_hash["input_sent"],input_params_hash["input_track_id"],input_params_hash["input_cash_flag"]])
+		p input_params_hash
+		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, notes) VALUES (?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%d.%m.%Y"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], input_params_hash["input_order_notes"]])
 		redirect('/orders')
 	end
 end
@@ -1452,7 +1461,7 @@ post '/add_new_buyer' do
 			input_params_hash[input_param_key] = input_param_value
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
-		$db_orders.execute("INSERT INTO buyers(name, notes) VALUES (?,?)", [input_params_hash["input_buyer"],input_params_hash["input_notes"]])
+		$db_orders.execute("INSERT INTO buyers(name, notes) VALUES (?,?)", [input_params_hash["input_buyer"],input_params_hash["input_buyer_notes"]])
 		
 		if input_params_hash['shown_modal'] == nil or input_params_hash['shown_modal'] == ""
 			redirect('/buyers')
@@ -1567,7 +1576,7 @@ post '/edit_buyer' do
 			input_params_hash[param_key] = input_param_value
 			input_params_hash[param_key] = "" if input_param_value == nil
 		end
-		$db_orders.execute("UPDATE buyers SET name=:name, notes=:notes WHERE name=:item", input_params_hash)
+		$db_orders.execute("UPDATE buyers SET name=:name, notes=:buyer_notes WHERE name=:item", input_params_hash)
 		redirect('/buyers')
 	end
 end

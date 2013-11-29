@@ -1,3 +1,24 @@
+<script>
+			$('#edit_buyer').typeahead({
+				source: <%=@buyers.to_json%>,
+				items: 20,
+				updater: function(item) {
+					return item;
+				}	
+			});
+			
+			$('#datepicker_edit').datepicker({
+				format: 'dd/mm/yyyy',
+				weekStart: 1,
+				language: 'uk',
+				todayHighlight: true,
+			}).on('changeDate', function(ev){$('#datepicker_edit').datepicker('hide');});
+
+			$('#add_buyer_button_in_edit').click(function(){
+				$('#edit_order_modal').modal('hide');
+				$('#add_buyer_link').click();
+			});
+</script>
 		<form id="edit_order_form" action="/edit_order" method="post" onsubmit="return validate_order_form()">
 			<input name="edit_id" type="hidden" value="<%=@edit_item%>">  
 			<div class="row-fluid">   
@@ -27,23 +48,19 @@
 					<label><%=Orders_table_headers['supplier']%></label>
 					<input type="text" id="edit_supplier" name="edit_supplier" class="span24" value="<%=@edit_data_hash['supplier']%>">  
 				</div>
-				<div class="span4 bgcolor">
+				<div class="span5 bgcolor">
 					<label><%=Orders_table_headers['inprice']%></label>
 					<input type="text" id="edit_inprice" name="edit_inprice" class="span24" value="<%=@edit_data_hash['inprice']%>">
 				</div>
-				<div class="span4 bgcolor">
-					<label><%=Orders_table_headers['rate']%></label>
-					<input type="text" id="edit_rate" name="edit_rate" class="span24" value="<%=@edit_data_hash['rate']%>">
-				</div>
-				<div class="span4 bgcolor">
+				<div class="span5 bgcolor">
 					<label><%=Orders_table_headers['outprice']%></label>
 					<input type="text" id="edit_outprice" name="edit_outprice" class="span24" value="<%=@edit_data_hash['outprice']%>">
 				</div>
-				<div class="span4 bgcolor">
+				<div class="span5 bgcolor">
 					<label><%=Orders_table_headers['transfered']%></label>
 					<input type="text" id="edit_transfered" name="edit_transfered" class="span24" value="<%=@edit_data_hash['transfered']%>">
 				</div>
-				<div class="span4 bgcolor">
+				<div class="span5 bgcolor">
 					<label><%=Orders_table_headers['transferprice']%></label>
 					<input type="text" id="edit_transferprice" name="edit_transferprice" class="span24" value="<%=@edit_data_hash['transferprice']%>">
 				</div>

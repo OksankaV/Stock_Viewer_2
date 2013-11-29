@@ -6,7 +6,7 @@
 			dataType: "json",
 			colModel : [
 				{display: "<%=Buyers_table_headers['buyer']%>", name : 'buyer', width : 300, sortable : true, align: 'left'},
-				{display: "<%=Buyers_table_headers['notes']%>", name : 'notes', width : 900, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'buyer_notes', width : 900, sortable : true, align: 'left'},
 				],
 			buttons : [
 				{name: 'Додати нового покупця', bimage: '/images/add-icon.png', onpress: add_new_buyer},
@@ -20,7 +20,7 @@
 				],
 			searchitems : [
 				{display: '<%=Buyers_table_headers['buyer']%>', name : 'buyer'},
-				{display: '<%=Buyers_table_headers['notes']%>', name : 'notes', isdefault: true}
+				{display: '<%=Buyers_table_headers['buyer_notes']%>', name : 'buyer_notes', isdefault: true}
 				],
 			sortname: "iso",
 			sortorder: "asc",
@@ -178,8 +178,8 @@
 			</div>
 			<div class="row-fluid">
 				<div class="span24">
-					<label><%=Orders_table_headers['notes']%></label>
-					<textarea type="text" id="input_notes" name="input_notes" class="span24" rows="2"></textarea>
+					<label><%=Orders_table_headers['buyer_notes']%></label>
+					<textarea type="text" id="input_buyer_notes" name="input_buyer_notes" class="span24" rows="2"></textarea>
 				</div>
 			</div>
 			<input id="shown_modal" name="shown_modal" type="hidden" value="">
