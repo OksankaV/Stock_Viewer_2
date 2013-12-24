@@ -32,17 +32,19 @@ Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'seas
 Seasons = ["-", "літо", "зима", "в/c"]
 Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
-Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Дата відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця'}
+Orders_table_headers_cut = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'К-ть', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Від-ня', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'region' => 'Регіон', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'План. от.', 'receive_date' => 'Факт. от.', 'post_name' => 'Трансп. комп.' , 'specification' => 'Уточнення'}
+Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'region' => 'Регіон', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'Планове отримання', 'receive_date' => 'Фактичне отримання', 'post_name' => 'Транспортна компанія' , 'specification' => 'Уточнення'}
 Buyers_table_headers = {'buyer' =>'Покупець', 'buyer_notes' => 'Нотатки'}
-Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'order_notes', 'buyer_notes']
+Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'order_notes', 'region', 'reserve_date', 'expected_receive_date', 'receive_date',     
+'post_name', 'specification', 'buyer_notes']
 Buyers_table_columns = ['buyer','buyer_notes']
 Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
 def select_data_from_db()
-	if File.exists?("data/tyre.db")
-		$db = SQLite3::Database.new("data/tyre.db")
-		$price_date_check = File.new("data/tyre.db").mtime
-		$price_date = File.new("data/tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y)")
+	if File.exists?("../data/tyre.db")
+		$db = SQLite3::Database.new("../data/tyre.db")
+		$price_date_check = File.new("../data/tyre.db").mtime
+		$price_date = File.new("../data/tyre.db").mtime.localtime("+03:00").strftime("(оновлено %d/%m/%Y)")
 	end
 	$tyre_size = $db.execute("SELECT DISTINCT sectionsize FROM price ORDER BY sectionsize ASC").flatten
 	$tyre_diameter = $db.execute("SELECT DISTINCT diameterc FROM price ORDER BY diameterc ASC").flatten
@@ -71,8 +73,8 @@ def select_data_from_db()
 end
 
 def select_data_from_orders_db()
-	if File.exists?("data/orders.db")
-		$db_orders = SQLite3::Database.new("data/orders.db")
+	if File.exists?("../data/orders.db")
+		$db_orders = SQLite3::Database.new("../data/orders.db")
 		$db_orders.execute("PRAGMA foreign_keys = ON;")
 	end	
 end
@@ -136,7 +138,7 @@ end
 select_data_from_db()
 
 get '/' do
-	if (File.new("data/tyre.db").mtime != $price_date_check)
+	if (File.new("../data/tyre.db").mtime != $price_date_check)
 		select_data_from_db()
 	end
     @message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"
@@ -1327,7 +1329,7 @@ post '/orders_table' do
 		
 		all_orders_array = []
 		orders_count = $db_orders.execute("SELECT count(*) FROM orders")
-		select_all_orders = $db_orders.execute("SELECT orders.*, buyers.notes FROM orders, buyers WHERE orders.buyer=buyers.name")
+		select_all_orders = $db_orders.execute("SELECT * FROM orders")
 		
 		select_all_orders.each do |one_row_data|
 			data_hash = {}
@@ -1418,6 +1420,7 @@ end
 post '/edit_order' do
 	if admin?
 		protected!
+		p params
 		input_params_hash = {}
 		params.each_pair do |input_param_key, input_param_value|
 			param_key = input_param_key.gsub(/edit_/,"").to_sym
@@ -1432,8 +1435,9 @@ post '/edit_order' do
 		input_params_hash[:payed_by_buyer] = boolean_hash_check(params,"edit_payed_by_buyer")
 		input_params_hash[:payed_by_us] = boolean_hash_check(params,"edit_payed_by_us")
 		input_params_hash[:cash_flag] = boolean_hash_check(params,"edit_cash_flag")
-
-		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id,  cash_flag=:cash_flag, notes=:order_notes WHERE id=:id", input_params_hash)
+		p input_params_hash
+		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id, cash_flag=:cash_flag, notes=:order_notes, region=:region, reserve_date=:reserve_date, expected_receive_date=:expected_receive_date, receive_date=:receive_date, post_name=:post_name, specification=:specification WHERE id=:id", input_params_hash)
+		p '--------------'
 		redirect('/orders')
 	end
 end
@@ -1448,7 +1452,7 @@ post '/add_new_order' do
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
 		p input_params_hash
-		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, notes) VALUES (?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%d.%m.%Y"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], input_params_hash["input_order_notes"]])
+		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, reserve_date, notes) VALUES (?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%d.%m.%Y"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], Time.now.strftime("%d.%m.%Y"), input_params_hash["input_order_notes"]])
 		redirect('/orders')
 	end
 end

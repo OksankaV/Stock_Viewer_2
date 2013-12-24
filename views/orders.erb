@@ -6,17 +6,19 @@
 			url: '/orders_table',
 			dataType: "json",
 			colModel : [
-				{display: "<%=Orders_table_headers['issued']%>", name : 'issued', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['buyer']%>", name : 'buyer', width : 150, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['article']%>", name : 'article', width : 200, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['amount']%>", name : 'amount', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['supplier']%>", name : 'supplier', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['inprice']%>", name : 'inprice', width : 100, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['outprice']%>", name : 'outprice', width : 115, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['status']%>", name : 'status', width : 100, sortable : true, align: 'center'},
-				
-				{display: "<%=Orders_table_headers['order_notes']%>", name : 'order_notes', width : 120, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers['buyer_notes']%>", name : 'buyer_notes', width : 120, sortable : true, align: 'center'}
+				{display: "<%=Orders_table_headers_cut['issued']%>", name : 'issued', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['buyer']%>", name : 'buyer', width : 150, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['article']%>", name : 'article', width : 200, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['amount']%>", name : 'amount', width : 40, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['supplier']%>", name : 'supplier', width : 40, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['region']%>", name : 'region', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['reserve_date']%>", name : 'reserve_date', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['sent']%>", name : 'sent', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['expected_receive_date']%>", name : 'expected_receive_date', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['receive_date']%>", name : 'receive_date', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['post_name']%>", name : 'post_name', width : 80, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['track_id']%>", name : 'track_id', width : 70, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 70, sortable : true, align: 'center'}
 				],
 			buttons : [
 				{name: 'Додати нове замовлення', bimage: '/images/add-icon.png', onpress: add_new_order},
