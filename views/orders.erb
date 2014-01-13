@@ -6,19 +6,18 @@
 			url: '/orders_table',
 			dataType: "json",
 			colModel : [
-				{display: "<%=Orders_table_headers_cut['issued']%>", name : 'issued', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['buyer']%>", name : 'buyer', width : 150, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['issued']%>", name : 'issued', width : 50, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['buyer']%>", name : 'buyer', width : 200, sortable : true, align: 'center'},
 				{display: "<%=Orders_table_headers_cut['article']%>", name : 'article', width : 200, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['amount']%>", name : 'amount', width : 40, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['supplier']%>", name : 'supplier', width : 40, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['region']%>", name : 'region', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['reserve_date']%>", name : 'reserve_date', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['sent']%>", name : 'sent', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['expected_receive_date']%>", name : 'expected_receive_date', width : 60, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['receive_date']%>", name : 'receive_date', width : 60, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['amount']%>", name : 'amount', width : 50, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['supplier']%>", name : 'supplier', width : 50, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['reserve_date']%>", name : 'reserve_date', width : 50, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['sent']%>", name : 'sent', width : 50, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['expected_receive_date']%>", name : 'expected_receive_date', width : 50, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['receive_date']%>", name : 'receive_date', width : 50, sortable : true, align: 'center'},
 				{display: "<%=Orders_table_headers_cut['post_name']%>", name : 'post_name', width : 80, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['track_id']%>", name : 'track_id', width : 70, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 70, sortable : true, align: 'center'}
+				{display: "<%=Orders_table_headers_cut['track_id']%>", name : 'track_id', width : 80, sortable : true, align: 'center'},
+				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 80, sortable : true, align: 'center'}
 				],
 			buttons : [
 				{name: 'Додати нове замовлення', bimage: '/images/add-icon.png', onpress: add_new_order},
@@ -48,6 +47,13 @@
 				return item;
 			}	
 		});
+		
+		$('.date').datepicker({
+			format: 'dd/mm/yyyy',
+			weekStart: 1,
+			language: 'uk',
+			todayHighlight: true,
+		}).on('changeDate', function(ev){$('.date').datepicker('hide');});
 	
 
 
@@ -132,9 +138,19 @@
 				alert ("Вкажіть покупця");
 				return false;
 			}
+			if ($('#input_telephone').val() == "")
+			{
+				alert ("Вкажіть номер телефону");
+				return false;
+			}
 			if (jQuery.inArray($('#input_buyer').val(), <%=@buyers.to_json%>) >= 0)
 			{
 				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
+				return false;
+			}
+			if (jQuery.inArray($('#input_telephone').val(), <%=@telephones.to_json%>) >= 0)
+			{
+				alert ("Покупець з номером телефона '" + $('#input_telephone').val() + "' вже існує, неможливо додати.");
 				return false;
 			}
 		});
@@ -230,7 +246,11 @@
 <style>
 	.modal {
 		width: 760px;
+		top: 5%;
 		margin-left: -380px;
+	}
+	.modal.fade.in {
+		top: 5%;
 	}
 	.modal-body {
 		max-height: 450px;
@@ -301,24 +321,33 @@
 			</div>
 
 			<div class="row-fluid">
-				<div class="span6 lightblue">
+				<div class="span5 lightblue">
 					<label><%=Orders_table_headers['supplier']%></label>
 					<input type="text" id="input_supplier" name="input_supplier" class="span24">  
 				</div>
-				<div class="span6 bgcolor">
+				<div class="span5 bgcolor">
 					<label><%=Orders_table_headers['inprice']%></label>
 					<input type="text" id="input_inprice" name="input_inprice" class="span24">
 				</div>
-				<div class="span6 bgcolor">
+				<div class="span5 bgcolor">
 					<label><%=Orders_table_headers['outprice']%></label>
 					<input type="text" id="input_outprice" name="input_outprice" class="span24">
 				</div>
-				<div class="span6 bgcolor">
+				<div class="span4 bgcolor">
 					<label><%=Orders_table_headers['status']%></label>
 					<select id="input_status" class="span24" name="input_status">
 						<option value="0"><%=Status_values_array[0]%></option>
 						<option value="1" selected="selected"><%=Status_values_array[1]%></option>
 					</select>
+				</div>
+				<div class="span5 bgcolor">
+					<label><%=Orders_table_headers['expected_receive_date']%></label>
+					<div class="row-fluid input-append date"  data-date-format="dd/mm/yyyy">
+						<input id="expected_receive_date" name="expected_receive_date" class="input-block-level span19" type="text" autocomplete="off" readonly>
+						<div class="add-on">
+							<div align="center"><i class="icon-calendar"></i></div>	
+						</div>
+					</div>	
 				</div>
 			</div>
 			<div class="row-fluid">
@@ -344,14 +373,32 @@
 	<div class="modal-body">
 		<form id="add_new_buyer_form" action="/add_new_buyer" method="post">      
 			<div class="row-fluid">   
-				<div class="span24">
-					<label for="input_buyer"><%=Orders_table_headers['buyer']%></label>
+				<div class="span8">
+					<label for="input_buyer"><%=Buyers_table_headers['buyer']%></label>
 					<input type="text" id="input_buyer" name="input_buyer" class="span24">  
+				</div>
+				<div class="span16">
+					<label for="input_fullname"><%=Buyers_table_headers['fullname']%></label>
+					<input type="text" id="input_fullname" name="input_fullname" class="span24">  
+				</div>
+			</div>
+			<div class="row-fluid">   
+				<div class="span8">
+					<label for="input_telephone"><%=Buyers_table_headers['telephone']%></label>
+					<input type="text" id="input_telephone" name="input_telephone" class="span24">  
+				</div>
+				<div class="span8">
+					<label for="input_city"><%=Buyers_table_headers['city']%></label>
+					<input type="text" id="input_city" name="input_city" class="span24">  
+				</div>
+				<div class="span8">
+					<label for="input_contact_person"><%=Buyers_table_headers['contact_person']%></label>
+					<input type="text" id="input_contact_person" name="input_contact_person" class="span24">  
 				</div>
 			</div>
 			<div class="row-fluid">
 				<div class="span24">
-					<label><%=Orders_table_headers['buyer_notes']%></label>
+					<label><%=Buyers_table_headers['buyer_notes']%></label>
 					<textarea type="text" id="input_buyer_notes" name="input_buyer_notes" class="span24" rows="2"></textarea>
 				</div>
 			</div>

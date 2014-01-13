@@ -4,9 +4,13 @@
 		$("#buyers_table").flexigrid({
 			url: '/buyers_table',
 			dataType: "json",
-			colModel : [
-				{display: "<%=Buyers_table_headers['buyer']%>", name : 'buyer', width : 300, sortable : true, align: 'left'},
-				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'buyer_notes', width : 900, sortable : true, align: 'left'},
+			colModel : [ 
+				{display: "<%=Buyers_table_headers['buyer']%>", name : 'buyer', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['fullname']%>", name : 'fullname', width : 200, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['telephone']%>", name : 'telephone', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['city']%>", name : 'city', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['contact_person']%>", name : 'contact_person', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'buyer_notes', width : 200, sortable : true, align: 'left'},
 				],
 			buttons : [
 				{name: 'Додати нового покупця', bimage: '/images/add-icon.png', onpress: add_new_buyer},
@@ -110,12 +114,27 @@
 				alert ("Вкажіть покупця");
 				return false;
 			}
+			if ($('#input_telephone').val() == "")
+			{
+				alert ("Вкажіть номер телефону");
+				return false;
+			}
 			if (jQuery.inArray($('#input_buyer').val(), <%=@buyers.to_json%>) >= 0)
 			{
 				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
 				return false;
 			}
+			if (jQuery.inArray($('#input_telephone').val(), <%=@telephones.to_json%>) >= 0)
+			{
+				alert ("Покупець з номером телефона '" + $('#input_telephone').val() + "' вже існує, неможливо додати.");
+				return false;
+			}
 
+		});
+		
+		$("#buyers_table").on('dblclick', 'tr', function (e) {
+			$(this).addClass('trSelected');
+			edit_buyer($(this));
 		});
 			
 	});
@@ -171,14 +190,32 @@
 	<div class="modal-body">
 		<form id="add_new_buyer_form" action="/add_new_buyer" method="post">      
 			<div class="row-fluid">   
-				<div class="span24">
-					<label for="input_buyer"><%=Orders_table_headers['buyer']%></label>
+				<div class="span8">
+					<label for="input_buyer"><%=Buyers_table_headers['buyer']%></label>
 					<input type="text" id="input_buyer" name="input_buyer" class="span24">  
+				</div>
+				<div class="span16">
+					<label for="input_fullname"><%=Buyers_table_headers['fullname']%></label>
+					<input type="text" id="input_fullname" name="input_fullname" class="span24">  
+				</div>
+			</div>
+			<div class="row-fluid">   
+				<div class="span8">
+					<label for="input_telephone"><%=Buyers_table_headers['telephone']%></label>
+					<input type="text" id="input_telephone" name="input_telephone" class="span24">  
+				</div>
+				<div class="span8">
+					<label for="input_city"><%=Buyers_table_headers['city']%></label>
+					<input type="text" id="input_city" name="input_city" class="span24">  
+				</div>
+				<div class="span8">
+					<label for="input_contact_person"><%=Buyers_table_headers['contact_person']%></label>
+					<input type="text" id="input_contact_person" name="input_contact_person" class="span24">  
 				</div>
 			</div>
 			<div class="row-fluid">
 				<div class="span24">
-					<label><%=Orders_table_headers['buyer_notes']%></label>
+					<label><%=Buyers_table_headers['buyer_notes']%></label>
 					<textarea type="text" id="input_buyer_notes" name="input_buyer_notes" class="span24" rows="2"></textarea>
 				</div>
 			</div>

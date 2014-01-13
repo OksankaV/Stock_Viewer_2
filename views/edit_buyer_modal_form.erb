@@ -1,15 +1,33 @@
 		<form id="edit_buyer_form" action="/edit_buyer" method="post">  
 			<input name="edit_item" type="hidden" value="<%=@edit_item%>">    
 			<div class="row-fluid">   
-				<div class="span24">
-					<label for="edit_name"><%=Orders_table_headers['buyer']%></label>
-					<input type="text" id="edit_name" name="edit_name" class="span24" value="<%=@edit_data_hash['buyer']%>">  
+				<div class="span8">
+					<label for="input_buyer"><%=Buyers_table_headers['buyer']%></label>
+					<input type="text" id="input_buyer" name="input_buyer" class="span24" value="<%=@edit_data_hash['buyer']%>">  
+				</div>
+				<div class="span16">
+					<label for="input_fullname"><%=Buyers_table_headers['fullname']%></label>
+					<input type="text" id="input_fullname" name="input_fullname" class="span24" value="<%=@edit_data_hash['fullname']%>">  
+				</div>
+			</div>
+			<div class="row-fluid">   
+				<div class="span8">
+					<label for="input_telephone"><%=Buyers_table_headers['telephone']%></label>
+					<input type="text" id="input_telephone" name="input_telephone" class="span24" value="<%=@edit_data_hash['telephone']%>">  
+				</div>
+				<div class="span8">
+					<label for="input_city"><%=Buyers_table_headers['city']%></label>
+					<input type="text" id="input_city" name="input_city" class="span24" value="<%=@edit_data_hash['city']%>">  
+				</div>
+				<div class="span8">
+					<label for="input_contact_person"><%=Buyers_table_headers['contact_person']%></label>
+					<input type="text" id="input_contact_person" name="input_contact_person" class="span24" value="<%=@edit_data_hash['contact_person']%>">  
 				</div>
 			</div>
 			<div class="row-fluid">
 				<div class="span24">
-					<label><%=Orders_table_headers['notes']%></label>
-					<textarea id="edit_notes" name="edit_notes" class="span24" rows="2"><%=@edit_data_hash['notes']%></textarea>
+					<label><%=Buyers_table_headers['buyer_notes']%></label>
+					<textarea id="edit_notes" name="edit_notes" class="span24" rows="2"><%=@edit_data_hash['buyer_notes']%></textarea>
 				</div>
 			</div>
 		</form>
