@@ -119,15 +119,37 @@
 				alert ("Вкажіть номер телефону");
 				return false;
 			}
-			if (jQuery.inArray($('#input_buyer').val(), <%=@buyers.to_json%>) >= 0)
+			
+			var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
+			if (jQuery.inArray($('#input_buyer').val(), buyers_telephones_array[0]) >= 0)
 			{
 				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
 				return false;
 			}
-			if (jQuery.inArray($('#input_telephone').val(), <%=@telephones.to_json%>) >= 0)
+			
+			var already_added_buyers_array = new Array();
+			buyer_index = 0;
+			for (i=0; i<buyers_telephones_array.length; i++)
 			{
-				alert ("Покупець з номером телефона '" + $('#input_telephone').val() + "' вже існує, неможливо додати.");
-				return false;
+				if (jQuery.inArray($('#input_telephone').val(), buyers_telephones_array[i][1].split(/\s*,\s*/)) >= 0)
+				{
+					already_added_buyers_array[buyer_index] = buyers_telephones_array[i][0];
+					buyer_index += 1;
+				}
+			}
+						
+			if (already_added_buyers_array.length == 1)
+			{
+				var confirm_telephone = confirm("Покупець '" + already_added_buyers_array + "' з номером телефона '" + $('#input_telephone').val() + "' вже існує, ви впевнені, що хочете додати ще одного?");
+				if (confirm_telephone == false)
+					return false;
+			}
+			
+			if (already_added_buyers_array.length > 1)
+			{
+				var confirm_telephone = confirm("Покупці '" + already_added_buyers_array + "' з номером телефона '" + $('#input_telephone').val() + "' вже існують, ви впевнені, що хочете додати ще одного?");
+				if (confirm_telephone == false)
+					return false;
 			}
 
 		});
@@ -168,7 +190,7 @@
 </style>
 <%end%>
 
-<%if (@count > 0) %>
+<%if (@buyers_telephones.length > 0) %>
 	<h5>Список покупців</h5>
 	<table id="buyers_table" ></table>
 <%else%>

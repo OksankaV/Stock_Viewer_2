@@ -35,7 +35,7 @@ Remain = Array.new(10000){ |index| index.to_s}
 Orders_table_headers_cut = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'К-ть', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Від-ня', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'План. от.', 'receive_date' => 'Факт. от.', 'post_name' => 'Трансп. комп.' , 'specification' => 'Уточнення'}
 Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'Планове отримання', 'receive_date' => 'Фактичне отримання', 'post_name' => 'Транспортна компанія' , 'specification' => 'Уточнення'}
 Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'order_notes','post_name', 'specification', 'reserve_date', 'expected_receive_date', 'receive_date']
-Buyers_table_columns = ['buyer', 'fullname', 'telephone', 'city', 'contact_person','buyer_notes']
+Buyers_table_columns = ['buyer','buyer_notes', 'fullname', 'telephone', 'city', 'contact_person']
 Buyers_table_headers = {'buyer' =>'Скорочена назва', 'fullname' => 'Повна назва', 'telephone' => 'Телефон', 'city' => 'Місто', 'contact_person' => 'Контактна особа', 'buyer_notes' => 'Нотатки'}
 Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
@@ -1294,9 +1294,7 @@ get '/orders' do
 	if admin?
 		protected!
 		select_data_from_orders_db()
-		@count = $db_orders.execute("SELECT count(*) FROM orders").flatten.first
-		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
-		@telephones = $db_orders.execute("SELECT telephone FROM buyers").flatten
+		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
 		if params[:show_modal] == nil
 			@show_modal = ""
 		else
@@ -1481,9 +1479,7 @@ get '/buyers' do
 	if admin?
 		protected!
 		select_data_from_orders_db()
-		@count = $db_orders.execute("SELECT count(*) FROM buyers").flatten.first
-		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
-		@telephones = $db_orders.execute("SELECT telephone FROM buyers").flatten
+		@buyers_telephones = $db_orders.execute("SELECT name, telephone FROM buyers")
 		buyers_from_orders_table = $db_orders.execute("SELECT distinct buyer FROM orders").flatten
 		@buyers_from_orders_table = []
 		buyers_from_orders_table.each do |buyer|
