@@ -120,7 +120,8 @@
 				return false;
 			}
 			
-			var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
+			var buyers_telephones_array = <%=@buyers_telephones.to_json%>;	
+			
 			if (jQuery.inArray($('#input_buyer').val(), buyers_telephones_array[0]) >= 0)
 			{
 				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");

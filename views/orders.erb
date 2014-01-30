@@ -6,18 +6,18 @@
 			url: '/orders_table',
 			dataType: "json",
 			colModel : [
-				{display: "<%=Orders_table_headers_cut['issued']%>", name : 'issued', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['buyer']%>", name : 'buyer', width : 200, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['article']%>", name : 'article', width : 200, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['amount']%>", name : 'amount', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['supplier']%>", name : 'supplier', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['reserve_date']%>", name : 'reserve_date', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['sent']%>", name : 'sent', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['expected_receive_date']%>", name : 'expected_receive_date', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['receive_date']%>", name : 'receive_date', width : 50, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['post_name']%>", name : 'post_name', width : 80, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['track_id']%>", name : 'track_id', width : 80, sortable : true, align: 'center'},
-				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 80, sortable : true, align: 'center'}
+				{display: "<%=Orders_table_headers_cut['issued']%>", name : 'issued', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['buyer']%>", name : 'buyer', width : 200, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['article']%>", name : 'article', width : 200, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['amount']%>", name : 'amount', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['supplier']%>", name : 'supplier', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['reserve_date']%>", name : 'reserve_date', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['sent']%>", name : 'sent', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['expected_receive_date']%>", name : 'expected_receive_date', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['receive_date']%>", name : 'receive_date', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['post_name']%>", name : 'post_name', width : 80, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['track_id']%>", name : 'track_id', width : 80, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 80, sortable : true, align: 'left'}
 				],
 			buttons : [
 				{name: 'Додати нове замовлення', bimage: '/images/add-icon.png', onpress: add_new_order},
@@ -41,19 +41,44 @@
 		<%end%>  
 		
 		var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
-		alert(buyers_telephones_array);
+
 		var buyers_array = new Array();
+		var telephones_array = new Array();
 		for (i=0; i<buyers_telephones_array.length; i++)
 		{
 			buyers_array[i] = buyers_telephones_array[i][0];
+			telephones_array[i] = buyers_telephones_array[i][1];
 		}
-		alert(buyers_array);
+
 		
 		$('#typeahead_buyer').typeahead({
-			source:  buyers_array,
+			source:  function(item,query) {
+				var select_buyers_array = new Array();
+				buyer_index = 0;
+				for (i=0; i<telephones_array.length; i++)
+				{
+					if (telephones_array[i].search(item) != -1)
+					{
+						select_buyers_array[buyer_index] = buyers_array[i];
+						buyer_index += 1;
+					}
+				}
+				for (i=0; i<buyers_array.length; i++)
+				{
+					if (buyers_array[i].search(item) != -1)
+					{
+						select_buyers_array[buyer_index] = buyers_array[i];
+						buyer_index += 1;
+					}
+				}
+				return select_buyers_array;
+			},
 			items: 20,
 			updater: function(item) {
 				return item;
+			},
+			matcher: function(item) {
+				return true;
 			}	
 		});
 		
@@ -91,17 +116,15 @@
      	$('#add_new_order_button').click(function() {
 			if ($('#typeahead_buyer').val() == "")
 			{
-				alert ("Виберіть покупця зі списку або додайте нового");
+				alert ("Виберіть покупця зі списку за назвою чи телефоном, або додайте нового");
 				return false;
 			}
-			for (i=0; i<buyers_telephones_array.length; i++)
+
+			if (jQuery.inArray($('#typeahead_buyer').val(), buyers_array) < 0)
 			{
-				if (jQuery.inArray($('#typeahead_buyer').val(), buyers_telephones_array[i][0]) < 0)
-				{
-					alert ("Покупця '" + $('#typeahead_buyer').val() + "' не існує, додайте нового або виберіть зі списку");
-					return false;
-				}
-			}	
+				alert ("Покупця '" + $('#typeahead_buyer').val() + "' не існує, додайте нового або виберіть зі списку");
+				return false;
+			}
 			if ($('#input_article').val() == "")
 			{
 				alert ("Вкажіть товар");
@@ -112,32 +135,41 @@
 				alert ("Вкажіть кількість");
 				return false;
 			}  
+
+			if ($('#input_supplier').val().search(/^\d*\s*\.*\-*\d*$/) == -1)
+			{
+				alert ("Неможливо додати, назва складу повинна містити тільки цифри та знаки '.', '-'");
+				return false;
+			}
 		});
 		
 		$('#edit_order_button').click(function() {
-				if ($('#edit_buyer').val() == "")
-				{
-					alert ("Виберіть покупця зі списку або додайте нового");
-					return false;
-				}
-				for (i=0; i<buyers_telephones_array.length; i++)
-				{
-					if (jQuery.inArray($('#edit_buyer').val(), buyers_telephones_array[i][0]) < 0)
-					{
-						alert ("Покупця '" + $('#edit_buyer').val() + "' не існує, додайте нового або виберіть зі списку");
-						return false;
-					} 
-				}	
-				if ($('#edit_article').val() == "")
-				{
-					alert ("Вкажіть товар");
-					return false;
-				}
-				if ($('#edit_amount').val() == "")
-				{
-					alert ("Вкажіть кількість");
-					return false;
-				}  
+			if ($('#edit_buyer').val() == "")
+			{
+				alert ("Виберіть покупця зі списку за назвою чи телефоном, або додайте нового");
+				return false;
+			}
+
+			if (jQuery.inArray($('#edit_buyer').val(), buyers_array) < 0)
+			{
+				alert ("Покупця '" + $('#edit_buyer').val() + "' не існує, додайте нового або виберіть зі списку");
+				return false;
+			} 
+			if ($('#edit_article').val() == "")
+			{
+				alert ("Вкажіть товар");
+				return false;
+			}
+			if ($('#edit_amount').val() == "")
+			{
+				alert ("Вкажіть кількість");
+				return false;
+			}  
+			if ($('#edit_supplier').val().search(/^\d*\s*\.*\-*\d*$/) == -1)
+			{
+				alert ("Неможливо додати, назва складу повинна містити тільки цифри та знаки '.', '-'");
+				return false;
+			}
 		});
 			
 		
@@ -159,22 +191,19 @@
 				return false;
 			}
 			
-			for (i=0; i<buyers_telephones_array.length; i++)
+			if (jQuery.inArray($('#input_buyer').val(), buyers_array) >= 0)
 			{
-				if (jQuery.inArray($('#input_buyer').val(), buyers_telephones_array[i][0]) >= 0)
-				{
-					alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
-					return false;
-				}
+				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
+				return false;
 			}
 			
 			var already_added_buyers_array = new Array();
 			buyer_index = 0;
-			for (i=0; i<buyers_telephones_array.length; i++)
+			for (i=0; i<telephones_array.length; i++)
 			{
-				if (jQuery.inArray($('#input_telephone').val(), buyers_telephones_array[i][1].split(/\s*,\s*/)) >= 0)
+				if (jQuery.inArray($('#input_telephone').val(), telephones_array[i].split(/\s*,\s*/)) >= 0)
 				{
-					already_added_buyers_array[buyer_index] = buyers_telephones_array[i][0];
+					already_added_buyers_array[buyer_index] = buyers_array[i];
 					buyer_index += 1;
 				}
 			}
@@ -339,7 +368,7 @@
 		<form id="add_new_order_form" action="/add_new_order" method="post" onsubmit="return validate_order_form()">      
 			<div class="row-fluid">   
 				<div class="span18 lightblue">
-					<label>Виберіть покупця зі списку або додайте нового</label>
+					<label>Виберіть покупця зі списку за назвою чи телефоном, або додайте нового</label>
 					<input id="typeahead_buyer" name="typeahead_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=@buyer_name%>">
 				</div>
 				<div class="span6 lightblue">

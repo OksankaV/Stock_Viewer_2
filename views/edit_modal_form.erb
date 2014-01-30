@@ -1,10 +1,43 @@
 <script>
-			$('#edit_buyer').typeahead({
-				source: <%=@buyers.to_json%>,
+
+		var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
+
+		var buyers_array = new Array();
+		var telephones_array = new Array();
+		for (i=0; i<buyers_telephones_array.length; i++)
+		{
+			buyers_array[i] = buyers_telephones_array[i][0];
+			telephones_array[i] = buyers_telephones_array[i][1];
+		}
+		$('#edit_buyer').typeahead({
+			source:  function(item,query) {
+				var select_buyers_array = new Array();
+				buyer_index = 0;
+				for (i=0; i<telephones_array.length; i++)
+				{
+					if (telephones_array[i].search(item) != -1)
+					{
+						select_buyers_array[buyer_index] = buyers_array[i];
+						buyer_index += 1;
+					}
+				}
+				for (i=0; i<buyers_array.length; i++)
+				{
+					if (buyers_array[i].search(item) != -1)
+					{
+						select_buyers_array[buyer_index] = buyers_array[i];
+						buyer_index += 1;
+					}
+				}
+				return select_buyers_array;
+			},
 				items: 20,
 				updater: function(item) {
 					return item;
-				}	
+				},
+			matcher: function(item) {
+				return true;
+			}			
 			});
 			
 			$('.date').datepicker({
@@ -23,7 +56,7 @@
 			<input name="edit_id" type="hidden" value="<%=@edit_item%>">  
 			<div class="row-fluid">   
 				<div class="span18 lightblue">
-					<label>Виберіть покупця</label>
+					<label>Виберіть покупця зі списку за назвою чи телефоном, або додайте нового</label>
 					<input id="edit_buyer" name="edit_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=@edit_data_hash['buyer']%>">
 				</div>
 				<div class="span6 lightblue">

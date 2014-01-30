@@ -1407,7 +1407,7 @@ get '/edit_modal_form' do
 		select_edit_row.each_index do |index|
 			@edit_data_hash[Orders_table_columns[index]] = select_edit_row[index]
 		end
-		@buyers = $db_orders.execute("SELECT name FROM buyers").flatten
+		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
 		erb :edit_modal_form, :layout => false
 	end	
 end
