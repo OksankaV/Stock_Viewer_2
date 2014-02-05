@@ -40,6 +40,14 @@
 		});
 		<%end%>  
 		
+		<%if @order_item != ""%>
+			$('#add_order_link').click();
+			$('#input_article').val(<%=@order_hash["article"].to_json%>);
+			$('#input_supplier').val(<%=@order_hash["supplier"].to_json%>);
+			$('#input_inprice').val(<%=@order_hash["sp"].to_json%>);
+			$('#input_outprice').val(<%=@order_hash["rp"].to_json%>);
+		<%end%>
+		
 		var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
 
 		var buyers_array = new Array();

@@ -37,6 +37,16 @@
 				{display: "<%=Price_table_headers['actualdate']%>", name : 'actualdate', width : 70, sortable : true, align: 'left'}
 				<%end%>	
 			],
+			buttons : [
+				{name: 'Повернутися до фільтру', bimage: '/images/back-icon.png', onpress: back_button_click},
+				{separator: true},
+				{name: 'Зберегти все у Excel-файл (спрощений)', bclass: 'excel_button', bimage: '/images/excel-icon.png', onpress: excel_button_click},
+				{separator: true},
+				{name: 'Зберегти все у Excel-файл (розширений)', bclass: 'advanced_excel_button', bimage: '/images/excel-icon.png', onpress: advanced_excel_button_click},
+				{separator: true},
+				{name: 'Оформити замовлення', bimage: '/images/orders-icon.png', onpress: order_click},
+				{separator: true}
+			],
 			params: <%=@checked_array.to_json%>,			
 			sortname: "rp",
 			sortorder: "asc",
@@ -48,10 +58,6 @@
 			height: setHeight()
 		});
 		
-		$('#back_button').click(function(){
-			parent.history.back();
-			return false;
-		});
 		
 		<%if @admin_select_items_page == true%>
 		$('.nav').delegate('#show_columns','click', function (e) {
@@ -74,31 +80,68 @@
 				itemlist.pop();
 			if (itemlist.length == 0)
 			{
-				$("#excel_button").find("strong").text("Зберегти все у Excel-файл (спрощений)");
-				$("#advanced_excel_button").find("strong").text("Зберегти все у Excel-файл (розширений)");
+				$(".excel_button").text("Зберегти все у Excel-файл (спрощений)");
+				$(".advanced_excel_button").text("Зберегти все у Excel-файл (розширений)");
 			} else { 
-				$("#excel_button").find("strong").text("Зберегти вибране у Excel-файл (спрощений)");
-				$("#advanced_excel_button").find("strong").text("Зберегти вибране у Excel-файл (розширений)");
+				$(".excel_button").text("Зберегти вибране у Excel-файл (спрощений)");
+				$(".advanced_excel_button").text("Зберегти вибране у Excel-файл (розширений)");
 			}	
 		});
 		
-		$("#excel_button").click(function(){
-			if (itemlist.length == 0)
-				$("#excel_button_selected").val("");
-			else
-				$("#excel_button_selected").val(itemlist);
-			$("#advanced_excel_print").val("false");	
-		});
+		function back_button_click()
+		{
+			parent.history.back();
+			return false;
+		}
 		
-		$("#advanced_excel_button").click(function(){
-			if (itemlist.length == 0)
+		function excel_button_click(com, grid)
+		{
+			if ($('.trSelected', grid).length == '0')
+			{
 				$("#excel_button_selected").val("");
-			else
+			} else {
 				$("#excel_button_selected").val(itemlist);
-			$("#advanced_excel_print").val("true");	
-		});
+			}
+			$("#advanced_excel_print").val("false");	
+			$("#excel_form").submit();
+		}
+		
+		function advanced_excel_button_click(com, grid)
+		{
+			if ($('.trSelected', grid).length == '0')
+			{
+				$("#excel_button_selected").val("");
+			} else {
+				$("#excel_button_selected").val(itemlist);
+			}		
+			$("#advanced_excel_print").val("true");
+			$("#excel_form").submit();
+		}
+		
+		function order_click(com, grid)
+		{
+			var selected_item = $('.trSelected', grid)
+			if (selected_item.length == '0')
+			{
+				alert('На вибрано жодного товару.');
+			}
+			else if (selected_item.length == '1')
+			{
+				var confirm_value = confirm('Ви впевнені, що хочете оформити замовлення?');
+				if (confirm_value)
+				{
+					var order_item = selected_item.attr("id");		
+					window.location.href = "/orders?item=" + order_item
+				}
+			}
+			else 
+			{
+				alert('Не можливо додати відразу декілька товарів до замовленння, виберіть, будь ласка, лише один товар.');
+			}	
+		}
 		
 	});
+		
 	
 
 		function setHeight(){
@@ -164,10 +207,7 @@
 		<%end%>
 		<div class="row-fluid">
 			<div class="back_button span24" align="center">
-				<form action="/excel_file" method="POST">
-					<button class="btn" id="back_button" ><i class="icon-arrow-left"></i> <strong>Повернутися до фільтру</strong></button>
-					<button class="btn" id="excel_button" type="submit"><i class="icon-file"></i><strong> Зберегти все у Excel-файл (спрощений)</strong></button>
-					<button class="btn" id="advanced_excel_button" type="submit"><i class="icon-file"></i><strong> Зберегти все у Excel-файл (розширений)</strong></button>
+				<form id="excel_form" action="/excel_file" method="POST">
 					<input type="hidden" id="excel_button_all" name="excel_button_all" value='<%=@checked_array.to_json%>'>
 					<input type="hidden" id="excel_button_selected" name="excel_button_selected" value="">
 					<input type="hidden" id="advanced_excel_print" name="advanced_excel_print" value="">

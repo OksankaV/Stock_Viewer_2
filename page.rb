@@ -26,7 +26,7 @@ end
 
 Title = "VSIKOLESA"
 Price_table_headers = {'brand' =>'Виробник', 'family' => 'Марка', 'dimensiontype' => 'Типорозмір', 'sidewall' => 'Боковина', 'origin' => 'Країна', 'runflat' => 'Run Flat', 'productiondate' => 'DOT', 'season' => 'Сезон',  'remain' => 'Залишок', 'supplier' => 'Склад', 'suppliercomment' => 'Постачальник', 'rp' => 'Роздрібна ціна', 'bp' => 'Гуртова ціна', 'sp' => 'Вхідна ціна', 'bpvat' => 'Гуртова з ПДВ', 'actualdate' => 'Дата', 'sourcestring' => 'Вхідний рядок'}
-Price_table_columns = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe']
+Price_table_columns = ['id', 'brand', 'family', 'origin', 'comment', 'remain', 'moreflag', 'supplier', 'sp', 'spc', 'sourcestring', 'minimalorder', 'deliverytyme', 'suppliercomment', 'actualdate', 'runflat', 'sidewall', 'productiondate', 'diameterc', 'application', 'season', 'traileraxle', 'steeringaxle', 'driveaxle', 'dimensiontype', 'sectionsize', 'bp', 'bpvat', 'bppe', 'rp', 'rpvat', 'rppe', 'unknown']
 Show_data_field = ['id','brand', 'family', 'dimensiontype', 'sidewall', 'origin', 'runflat', 'productiondate', 'season', 'bp', 'remain', 'supplier', 'rp', 'sp', 'suppliercomment', 'bpvat', 'actualdate', 'sourcestring']
 Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'season' => 'Сезон', 'dimensiontype' => 'Типорозмір', 'bp' => 'Гуртова ціна', 'rp' => 'Роздрібна ціна'}
 Seasons = ["-", "літо", "зима", "в/c"]
@@ -1287,12 +1287,41 @@ post '/excel_file' do
 	end
 	xls_file.serialize temp.path
     send_file temp.path, :filename => "vsikolesa.xls", :type => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-	
 end
 
 get '/orders' do
 	if admin?
 		protected!
+		if params[:item] == nil
+			@order_item = ""
+		else
+			@order_item = params[:item].gsub(/row/,'')
+			order_array = $db.execute("SELECT dimensiontype, brand, family, supplier, sp, spc, rp FROM price where id = ?",@order_item).flatten
+			@order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'rp' => order_array[6]}
+			@order_hash.each_pair do |order_key, order_value|
+				if order_value.class == Float	
+	  				@order_hash[order_key] = order_value.round(2)
+		  		end	
+		  		if (order_key == 'sp') and (@order_hash['sp'] != 0 or @order_hash['sp'] != "невідомо")
+		  			if @order_hash['spc'] == "1"
+		  				@order_hash[order_key] = @order_hash[order_key].ceil.to_s + " грн."
+		  			elsif  @order_hash['spc'] == "2"
+		 				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " $"
+		  			elsif  @order_hash['spc'] == "3"
+		  				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " &euro;"
+		  			elsif  @order_hash['spc'] == "4"
+		  				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " PLN"
+		  			end
+		  		end
+		  		if (order_key == 'sp') and (@order_hash['sp'] == 0 or @order_hash['sp'] == "невідомо")
+		  			@order_hash[order_key] = "невідомо"	
+		  		end
+		  		if (order_key == 'supplier')
+		  			@order_hash[order_key] = @order_hash[order_key].gsub(/№/,"")
+		  		end
+			end
+		end		
+		
 		select_data_from_orders_db()
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
 		if params[:show_modal] == nil
