@@ -26,27 +26,37 @@
 				{separator: true},
 				{name: 'Редагувати замовлення', bimage: '/images/edit-icon.png', onpress: edit_order_in_table},
 				{separator: true},
+				{name: 'Переглянути всі замовлення', bclass: 'view_all_orders_button', bimage: '/images/orders-icon.png', onpress: view_all_orders},
+				{separator: true},
 				{name: 'Переглянути список покупців', bimage: '/images/users-icon.png', onpress: buyer_list},
 				{separator: true}
 				],
-			sortname: "iso",
+			params: <%=@view_all_orders.to_json%>,	
+			sortname: "issued",
 			sortorder: "asc",
 			usepager: true,
 			useRp: true,
-			rp: 15,
+			rp: 30,
 			showTableToggleBtn: true,
 			width: 200,
 			height: 660
 		});
 		<%end%>  
 		
-		<%if @order_item != ""%>
+		<%if @order_hash != {}%>
 			$('#add_order_link').click();
 			$('#input_article').val(<%=@order_hash["article"].to_json%>);
 			$('#input_supplier').val(<%=@order_hash["supplier"].to_json%>);
 			$('#input_inprice').val(<%=@order_hash["sp"].to_json%>);
-			$('#input_outprice').val(<%=@order_hash["rp"].to_json%>);
+			$('#input_outprice').val(<%=@order_hash["bp"].to_json%>);
+			$('#shown_modal').val("show_add_modal");
 		<%end%>
+		
+		<%if @view_all_orders[0]["value"] == "true"%>
+				$(".view_all_orders_button").text("Переглянути неотримані замовлення");
+		<%else%>
+				$(".view_all_orders_button").text("Переглянути всі замовлення");
+		<%end%>  	
 		
 		var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
 
@@ -119,6 +129,7 @@
 				window.location.href = '/orders';
 			});
 		<%end%>
+		
 		
 
      	$('#add_new_order_button').click(function() {
@@ -315,7 +326,16 @@
 		function buyer_list(com, grid) 
 		{	
 			window.location.href='/buyers'
-		}	
+		}
+		
+		function view_all_orders(com,grid)
+		{
+			var view_all_orders = <%=@view_all_orders[0]['value']%>
+			if (view_all_orders == true)
+            	window.location.href = "/orders"
+            else
+           		window.location.href = "/orders?view_all_orders=true"	
+		}
 		
 
 </script>
@@ -479,6 +499,7 @@
 				</div>
 			</div>
 			<input id="shown_modal" name="shown_modal" type="hidden" value="">
+			<input id="order_hash" name="order_hash" type="hidden" value='<%=@order_hash.to_json%>'>
 			<input id="edit_item" name="edit_item" type="hidden" value="">
 		</form>
 	

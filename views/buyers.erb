@@ -5,12 +5,12 @@
 			url: '/buyers_table',
 			dataType: "json",
 			colModel : [ 
-				{display: "<%=Buyers_table_headers['buyer']%>", name : 'buyer', width : 150, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['buyer']%>", name : 'name', width : 150, sortable : true, align: 'left'},
 				{display: "<%=Buyers_table_headers['fullname']%>", name : 'fullname', width : 200, sortable : true, align: 'left'},
 				{display: "<%=Buyers_table_headers['telephone']%>", name : 'telephone', width : 150, sortable : true, align: 'left'},
 				{display: "<%=Buyers_table_headers['city']%>", name : 'city', width : 150, sortable : true, align: 'left'},
 				{display: "<%=Buyers_table_headers['contact_person']%>", name : 'contact_person', width : 150, sortable : true, align: 'left'},
-				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'buyer_notes', width : 200, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'notes', width : 200, sortable : true, align: 'left'},
 				],
 			buttons : [
 				{name: 'Додати нового покупця', bimage: '/images/add-icon.png', onpress: add_new_buyer},
@@ -23,14 +23,14 @@
 				{separator: true}
 				],
 			searchitems : [
-				{display: '<%=Buyers_table_headers['buyer']%>', name : 'buyer'},
-				{display: '<%=Buyers_table_headers['buyer_notes']%>', name : 'buyer_notes', isdefault: true}
+				{display: "<%=Buyers_table_headers['buyer']%>", name : 'name', isdefault: true},
+				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'notes'}
 				],
-			sortname: "iso",
+			sortname: "name",
 			sortorder: "asc",
 			usepager: true,
 			useRp: true,
-			rp: 15,
+			rp: 30,
 			showTableToggleBtn: true,
 			width: 200,
 			height: 660

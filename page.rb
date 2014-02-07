@@ -34,9 +34,9 @@ Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
 Orders_table_headers_cut = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'К-ть', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Від-ня', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'План. от.', 'receive_date' => 'Факт. от.', 'post_name' => 'Трансп. комп.' , 'specification' => 'Уточнення'}
 Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'Планове отримання', 'receive_date' => 'Фактичне отримання', 'post_name' => 'Транспортна компанія' , 'specification' => 'Уточнення'}
-Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'order_notes','post_name', 'specification', 'reserve_date', 'expected_receive_date', 'receive_date']
-Buyers_table_columns = ['buyer','buyer_notes', 'fullname', 'telephone', 'city', 'contact_person']
-Buyers_table_headers = {'buyer' =>'Скорочена назва', 'fullname' => 'Повна назва', 'telephone' => 'Телефон', 'city' => 'Місто', 'contact_person' => 'Контактна особа', 'buyer_notes' => 'Нотатки'}
+Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'notes','post_name', 'specification', 'reserve_date', 'expected_receive_date', 'receive_date']
+Buyers_table_columns = ['name','notes', 'fullname', 'telephone', 'city', 'contact_person']
+Buyers_table_headers = {'buyer' =>'Скорочена назва', 'fullname' => 'Повна назва', 'telephone' => 'Телефон', 'city' => 'Місто', 'contact_person' => 'Контактна особа', 'notes' => 'Нотатки'}
 Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
 def select_data_from_db()
@@ -691,8 +691,7 @@ post '/table_selected_items' do
 	@checked_brand_array = params[:checked_brand]
 	@checked_brand_array = [] if @checked_brand_array == nil
 	@bind_hash = {}
-    sortname_column = params[:sortname]
-    sortorder_value = params[:sortorder]
+
     sortname_column = params[:sortname]
     rp_number = params[:rp]
     page_number = params[:page]
@@ -854,7 +853,7 @@ post '/table_selected_items' do
 	select_count = select_string.gsub(/\*/,"count(*)")
 	rows_count = $db.execute(select_count, @bind_hash).flatten
 	@select_string_to_excel = select_string
-	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i.to_i
+	offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i
 	select_string = select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
 		
 	all_data_array = []
@@ -1292,12 +1291,18 @@ end
 get '/orders' do
 	if admin?
 		protected!
+
 		if params[:item] == nil
 			@order_item = ""
+			if params[:order_hash] == nil
+				@order_hash = {}
+			else	
+				@order_hash = JSON.parse(params[:order_hash])
+			end	
 		else
 			@order_item = params[:item].gsub(/row/,'')
-			order_array = $db.execute("SELECT dimensiontype, brand, family, supplier, sp, spc, rp FROM price where id = ?",@order_item).flatten
-			@order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'rp' => order_array[6]}
+			order_array = $db.execute("SELECT dimensiontype, brand, family, supplier, sp, spc, bp FROM price where id = ?",@order_item).flatten
+			@order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'bp' => order_array[6]}
 			@order_hash.each_pair do |order_key, order_value|
 				if order_value.class == Float	
 	  				@order_hash[order_key] = order_value.round(2)
@@ -1339,6 +1344,11 @@ get '/orders' do
 		else
 			@edit_item = params[:edit_item].gsub!(/row/,'')
 		end
+		if params[:view_all_orders] == nil
+			@view_all_orders = [{'name' => 'view_all_orders', 'value' => "false"}]
+		else
+			@view_all_orders = [{'name' => 'view_all_orders', 'value' => params[:view_all_orders]}]
+		end
 		erb :orders 
 	end	
 end 
@@ -1347,17 +1357,26 @@ post '/orders_table' do
 	if admin?
 		protected!
 		sortname_column = params[:sortname]
-		sortorder_value = params[:sortorder]
-		sortname_column = params[:sortname]
 		rp_number = params[:rp]
 		page_number = params[:page]
 		sortorder_value = params[:sortorder]
-		
+		if params[:view_all_orders] == nil
+			view_all_orders = "false"
+		else
+			view_all_orders = params[:view_all_orders]
+		end
+
+		offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i
+		if view_all_orders == "true"
+			select_string = "SELECT * FROM orders" + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
+		else
+			select_string = "SELECT * FROM orders where (receive_date ISNULL or receive_date IS '')" + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s
+		end	
+		select_count = select_string.gsub(/\*/,"count(*)")
+		orders_count = $db_orders.execute(select_count).flatten
+		select_all_orders = $db_orders.execute(select_string)
 		
 		all_orders_array = []
-		orders_count = $db_orders.execute("SELECT count(*) FROM orders")
-		select_all_orders = $db_orders.execute("SELECT * FROM orders")
-		
 		select_all_orders.each do |one_row_data|
 			data_hash = {}
 			one_row_data.each_index do |index|
@@ -1495,11 +1514,10 @@ post '/add_new_buyer' do
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
 		$db_orders.execute("INSERT INTO buyers(name, fullname, telephone, city, contact_person, notes) VALUES (?,?,?,?,?,?)", [input_params_hash["input_buyer"],input_params_hash["input_fullname"],input_params_hash["input_telephone"],input_params_hash["input_city"],input_params_hash["input_contact_person"],input_params_hash["input_buyer_notes"]])
-		
 		if input_params_hash['shown_modal'] == nil or input_params_hash['shown_modal'] == ""
 			redirect('/buyers')
 		else 	
-			redirect(URI.escape('/orders?show_modal=' + input_params_hash['shown_modal'] + '&edit_item=' + input_params_hash["edit_item"] + '&buyer_name=' + input_params_hash["input_buyer"]))
+			redirect(URI.escape('/orders?show_modal=' + input_params_hash['shown_modal'] + '&edit_item=' + input_params_hash["edit_item"] + '&buyer_name=' + input_params_hash["input_buyer"] + '&order_hash=' + input_params_hash["order_hash"]))
 		end	
 	end
 end
@@ -1523,16 +1541,15 @@ post '/buyers_table' do
 	if admin?
 		protected!
 		sortname_column = params[:sortname]
-		sortorder_value = params[:sortorder]
-		sortname_column = params[:sortname]
 		rp_number = params[:rp]
 		page_number = params[:page]
 		sortorder_value = params[:sortorder]
 		
-		
+		offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i
+		select_string = "SELECT * FROM buyers " + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
 		all_buyers_array = []
 		buyers_count = $db_orders.execute("SELECT count(*) FROM buyers")
-		select_all_buyers = $db_orders.execute("SELECT * FROM buyers")
+		select_all_buyers = $db_orders.execute(select_string)
 		
 		select_all_buyers.each do |one_row_data|
 			data_hash = {}
@@ -1546,14 +1563,13 @@ post '/buyers_table' do
 		rows_array = []
 
 		all_buyers_array.each do |value_hash|
-			rows_array.push({"id" => value_hash["buyer"], "cell" => value_hash})
+			rows_array.push({"id" => value_hash["name"], "cell" => value_hash})
 		end
 		
 		select_data["page"] = page_number
 		select_data["total"] = buyers_count
 		select_data["rows"] = rows_array
 		select_data["post"] = []
-
 		return (JSON.pretty_generate(select_data))
 	end
 end
