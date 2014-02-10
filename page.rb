@@ -1368,14 +1368,14 @@ post '/orders_table' do
 
 		offset_value = page_number.to_i * rp_number.to_i - rp_number.to_i
 		if view_all_orders == "true"
-			select_string = "SELECT * FROM orders" + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s	
+			select_string = "SELECT * FROM orders"	
 		else
-			select_string = "SELECT * FROM orders where (receive_date ISNULL or receive_date IS '')" + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s
+			select_string = "SELECT * FROM orders where (receive_date ISNULL or receive_date IS '')"
 		end	
 		select_count = select_string.gsub(/\*/,"count(*)")
 		orders_count = $db_orders.execute(select_count).flatten
-		select_all_orders = $db_orders.execute(select_string)
-		
+		select_all_orders = $db_orders.execute(select_string + " order by " + sortname_column + " " + sortorder_value + " limit " + rp_number + " offset " + offset_value.to_s)
+		 
 		all_orders_array = []
 		select_all_orders.each do |one_row_data|
 			data_hash = {}
@@ -1399,9 +1399,15 @@ post '/orders_table' do
 		  			all_orders_array[all_orders_array_index][orders_hash_key] = Status_values_array[orders_hash_value.to_i]
 		  		end
 		  		if (orders_hash_key == 'issued' or orders_hash_key == 'reserve_date' or orders_hash_key == 'sent' or orders_hash_key == 'expected_receive_date' or orders_hash_key == 'receive_date') and orders_hash_value != "" and orders_hash_value != nil
-		  			orders_hash_value
-		  			date = orders_hash_value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
-		  			all_orders_array[all_orders_array_index][orders_hash_key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%d/%m")
+					if orders_hash_value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten.empty? == false
+		  				date = orders_hash_value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
+		  				all_orders_array[all_orders_array_index][orders_hash_key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%d/%m")
+		  			end
+		  			if orders_hash_value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten.empty? == false
+		  				date = orders_hash_value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten
+		  				all_orders_array[all_orders_array_index][orders_hash_key] = Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%d/%m")
+		  			end	
+		  			
 		  		end	
 			end
 		end
@@ -1416,7 +1422,6 @@ post '/orders_table' do
 		select_data["total"] = orders_count
 		select_data["rows"] = rows_array
 		select_data["post"] = []
-
 		return (JSON.pretty_generate(select_data))
 	end	
 end
@@ -1455,6 +1460,19 @@ get '/edit_modal_form' do
 		select_edit_row.each_index do |index|
 			@edit_data_hash[Orders_table_columns[index]] = select_edit_row[index]
 		end
+		@edit_data_hash.each_pair do |key,value|
+			if (key == 'reserve_date' or key == 'sent' or key == 'expected_receive_date' or key == 'receive_date') and value != "" and value != nil
+				if value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten.empty? == false
+		  			date = value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
+		  			@edit_data_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%d/%m/%Y")
+		  		end
+		  		if value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten.empty? == false
+		  			date = value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten
+		  			@edit_data_hash[key] = Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%d/%m/%Y")
+		  		end	
+		  			
+		  	end	
+		end
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
 		erb :edit_modal_form, :layout => false
 	end	
@@ -1481,11 +1499,25 @@ post '/edit_order' do
 			end	
 			input_params_hash[param_key] = "" if input_param_value == nil
 		end
-		input_params_hash[:issued] = Time.now.strftime("%d/%m/%Y")
-		input_params_hash[:payed_by_buyer] = boolean_hash_check(params,"edit_payed_by_buyer")
-		input_params_hash[:payed_by_us] = boolean_hash_check(params,"edit_payed_by_us")
-		input_params_hash[:cash_flag] = boolean_hash_check(params,"edit_cash_flag")
-		input_params_hash
+
+		input_params_hash.each_pair do |key, value|
+			if (key == :payed_by_buyer) or (key == :payed_by_us) or (key == :cash_flag)
+				input_params_hash[key] = boolean_hash_check(params,"edit_" + key.to_s)
+			end
+			if (key == :reserve_date or key == :sent or key == :expected_receive_date or key == :receive_date) and value != "" and value != nil
+				if value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten.empty? == false
+		  			date = value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
+		  			input_params_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%Y-%m-%d")
+		  		end
+		  		if value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten.empty? == false
+		  			date = value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten
+		  			input_params_hash[key] = Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%Y-%m-%d")
+		  		end	
+		  			
+		  	end	
+		end
+		input_params_hash[:issued] = Time.now.strftime("%Y-%m-%d")
+
 		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id, cash_flag=:cash_flag, notes=:order_notes, reserve_date=:reserve_date, expected_receive_date=:expected_receive_date, receive_date=:receive_date, post_name=:post_name, specification=:specification WHERE id=:id", input_params_hash)
 		redirect('/orders')
 	end
@@ -1500,7 +1532,7 @@ post '/add_new_order' do
 			input_params_hash[input_param_key] = 1 if input_param_value == "on"
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
-		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, reserve_date, expected_receive_date, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%d/%m/%Y"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], Time.now.strftime("%d/%m/%Y"), input_params_hash["expected_receive_date"], input_params_hash["input_order_notes"]])
+		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, reserve_date, expected_receive_date, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], Time.now.strftime("%Y-%m-%d"), input_params_hash["expected_receive_date"], input_params_hash["input_order_notes"]])
 		redirect('/orders')
 	end
 end
