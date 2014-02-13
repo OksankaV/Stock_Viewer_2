@@ -1,7 +1,7 @@
 <% content_for :head do %>
 	<script type="text/javascript">
 	$(document).ready(function() {
-		<%if (@show_modal == "")%>
+		<%if (session[:show_modal] == nil)%>
 		$("#orders_table").flexigrid({
 			url: '/orders_table',
 			dataType: "json",
@@ -43,12 +43,12 @@
 		});
 		<%end%>  
 		
-		<%if @order_hash != {}%>
+		<%if @order_item != ""%>
 			$('#add_order_link').click();
-			$('#input_article').val(<%=@order_hash["article"].to_json%>);
-			$('#input_supplier').val(<%=@order_hash["supplier"].to_json%>);
-			$('#input_inprice').val(<%=@order_hash["sp"].to_json%>);
-			$('#input_outprice').val(<%=@order_hash["bp"].to_json%>);
+			$('#input_article').val(<%=session[:order_hash]["article"].to_json%>);
+			$('#input_supplier').val(<%=session[:order_hash]["supplier"].to_json%>);
+			$('#input_inprice').val(<%=session[:order_hash]["sp"].to_json%>);
+			$('#input_outprice').val(<%=session[:order_hash]["bp"].to_json%>);
 			$('#shown_modal').val("show_add_modal");
 		<%end%>
 		
@@ -109,20 +109,19 @@
 	
 
 
-		<%if (@show_modal == 'show_add_modal')%>
+		<%if (session[:show_modal] == 'show_add_modal')%>
 			$('#add_order_modal').modal('show');
 			$('#add_new_order_cencel').click(function(){
 				window.location.href = '/orders';
 			});
 		<%end%>
 		
-		<%if (@show_modal == 'show_edit_modal')%>
+		<%if (session[:show_modal] == 'show_edit_modal')%>
 			$.get("/edit_modal_form",
-               	{item: <%=@edit_item%>},
                	function(data) {$('#edit_order_modal .modal-body').html(data)}
             );
             $('div').delegate('#edit_order_modal','shown', function (e) {
-           		$('#edit_buyer').val("<%=@buyer_name%>");
+           		$('#edit_buyer').val("<%=session[:buyer_name]%>");
            	});
             $('#edit_order_link').click();
 			$('#edit_order_cencel').click(function(){
@@ -370,7 +369,7 @@
 </style>
 <%end%>
 
-<%if (@show_modal == "") %>
+<%if (session[:show_modal] == nil) %>
 	<%if (@buyers_telephones.length > 0) %>
 		<h5>Список замовлень</h5>
 		<table id="orders_table"></table>
@@ -397,7 +396,7 @@
 			<div class="row-fluid">   
 				<div class="span18 lightblue">
 					<label>Виберіть покупця зі списку за назвою чи телефоном, або додайте нового</label>
-					<input id="typeahead_buyer" name="typeahead_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=@buyer_name%>">
+					<input id="typeahead_buyer" name="typeahead_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=session[:buyer_name]%>">
 				</div>
 				<div class="span6 lightblue">
 					<label for="add_buyer_button_in_order">Новий покупець</label>
@@ -499,7 +498,6 @@
 				</div>
 			</div>
 			<input id="shown_modal" name="shown_modal" type="hidden" value="">
-			<input id="order_hash" name="order_hash" type="hidden" value='<%=@order_hash.to_json%>'>
 			<input id="edit_item" name="edit_item" type="hidden" value="">
 		</form>
 	

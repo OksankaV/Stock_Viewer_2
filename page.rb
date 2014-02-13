@@ -8,6 +8,8 @@ require 'net/http'
 require 'uri'
 require 'axlsx'
 
+enable :sessions
+
 require_relative 'public/lib/content'
 
 set :protection, :except => :ip_spoofing
@@ -140,6 +142,7 @@ get '/' do
 	if (File.new("../data/tyre.db").mtime != $price_date_check)
 		select_data_from_db()
 	end
+
     @message = "Для пошуку даних обов'язково введіть параметр Ширина/Висота"
     @message_no_data = "Немає даних, що відповідають вибраним значенням"
     if params[:press_reset_button] == "true"
@@ -1294,62 +1297,52 @@ get '/orders' do
 
 		if params[:item] == nil
 			@order_item = ""
-			if params[:order_hash] == nil
-				@order_hash = {}
-			else	
-				@order_hash = JSON.parse(params[:order_hash])
-			end	
+			session.delete(:order_hash)
 		else
 			@order_item = params[:item].gsub(/row/,'')
 			order_array = $db.execute("SELECT dimensiontype, brand, family, supplier, sp, spc, bp FROM price where id = ?",@order_item).flatten
-			@order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'bp' => order_array[6]}
-			@order_hash.each_pair do |order_key, order_value|
+			order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'bp' => order_array[6]}
+			order_hash.each_pair do |order_key, order_value|
 				if order_value.class == Float	
-	  				@order_hash[order_key] = order_value.round(2)
+	  				order_hash[order_key] = order_value.round(2)
 		  		end	
-		  		if (order_key == 'sp') and (@order_hash['sp'] != 0 or @order_hash['sp'] != "невідомо")
-		  			if @order_hash['spc'] == "1"
-		  				@order_hash[order_key] = @order_hash[order_key].ceil.to_s + " грн."
-		  			elsif  @order_hash['spc'] == "2"
-		 				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " $"
-		  			elsif  @order_hash['spc'] == "3"
-		  				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " &euro;"
-		  			elsif  @order_hash['spc'] == "4"
-		  				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " PLN"
+		  		if (order_key == 'sp') and (order_hash['sp'] != 0 or order_hash['sp'] != "невідомо")
+		  			if order_hash['spc'] == "1"
+		  				order_hash[order_key] = order_hash[order_key].ceil.to_s + " грн."
+		  			elsif  order_hash['spc'] == "2"
+		 				order_hash[order_key] = (order_hash[order_key] + 0.0499999).round(1).to_s + " $"
+		  			elsif  order_hash['spc'] == "3"
+		  				order_hash[order_key] = (order_hash[order_key] + 0.0499999).round(1).to_s + " &euro;"
+		  			elsif  order_hash['spc'] == "4"
+		  				order_hash[order_key] = (order_hash[order_key] + 0.0499999).round(1).to_s + " PLN"
 		  			end
 		  		end
-		  		if (order_key == 'sp') and (@order_hash['sp'] == 0 or @order_hash['sp'] == "невідомо")
-		  			@order_hash[order_key] = "невідомо"	
+		  		if (order_key == 'sp') and (order_hash['sp'] == 0 or order_hash['sp'] == "невідомо")
+		  			order_hash[order_key] = "невідомо"	
 		  		end
 		  		if (order_key == 'supplier')
-		  			@order_hash[order_key] = @order_hash[order_key].gsub(/№/,"")
+		  			order_hash[order_key] = order_hash[order_key].gsub(/№/,"")
 		  		end
 			end
+			session[:order_hash] = order_hash
 		end		
 		
 		select_data_from_orders_db()
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
-		if params[:show_modal] == nil
-			@show_modal = ""
-		else
-			@show_modal = params[:show_modal]
-		end	
-		if params[:buyer_name] == nil
-			@buyer_name = ""
-		else
-			@buyer_name = params[:buyer_name]
+		p params[:buyer_redirect]
+		if params[:buyer_redirect] == nil
+			session.delete(:show_modal)
+			session.delete(:buyer_name)
+			session.delete(:edit_item)
 		end
-		if params[:edit_item] == nil
-			@edit_item = ""
-		else
-			@edit_item = params[:edit_item].gsub!(/row/,'')
-		end
+		p "--------------------------"
 		if params[:view_all_orders] == nil
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => "false"}]
 		else
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => params[:view_all_orders]}]
 		end
-		erb :orders 
+		p session
+		erb :orders
 	end	
 end 
 
@@ -1452,7 +1445,7 @@ end
 get '/edit_modal_form' do
 	if admin?
 		protected!
-		@edit_item = params[:item]
+		@edit_item = session[:edit_item]
 		@edit_item.gsub!(/row/,'')
 
 		select_edit_row = $db_orders.execute("SELECT * FROM orders WHERE id=?", [@edit_item]).flatten
@@ -1540,6 +1533,7 @@ end
 post '/add_new_buyer' do
 	if admin?
 		protected!
+
 		input_params_hash = {}
 		params.each_pair do |input_param_key, input_param_value|
 			input_params_hash[input_param_key] = input_param_value
@@ -1548,8 +1542,11 @@ post '/add_new_buyer' do
 		$db_orders.execute("INSERT INTO buyers(name, fullname, telephone, city, contact_person, notes) VALUES (?,?,?,?,?,?)", [input_params_hash["input_buyer"],input_params_hash["input_fullname"],input_params_hash["input_telephone"],input_params_hash["input_city"],input_params_hash["input_contact_person"],input_params_hash["input_buyer_notes"]])
 		if input_params_hash['shown_modal'] == nil or input_params_hash['shown_modal'] == ""
 			redirect('/buyers')
-		else 	
-			redirect(URI.escape('/orders?show_modal=' + input_params_hash['shown_modal'] + '&edit_item=' + input_params_hash["edit_item"] + '&buyer_name=' + input_params_hash["input_buyer"] + '&order_hash=' + input_params_hash["order_hash"]))
+		else
+			session[:show_modal] = input_params_hash['shown_modal']
+			session[:edit_item] = input_params_hash["edit_item"].gsub!(/row/,'')
+			session[:buyer_name] = input_params_hash["input_buyer"]
+			redirect(URI.escape('/orders?buyer_redirect=true'))
 		end	
 	end
 end

@@ -424,7 +424,7 @@
 					p.page = 1;
 					this.buildpager();
 					$('.pPageStat', this.pDiv).html(p.nomsg);
-					$('.flexigrid').replaceWith('<div id="message_id" class="alert alert-info" align="center"><strong>Результатів немає. Спробуйте спростити фільтр.</strong></div>');
+					//$('.flexigrid').replaceWith('<div id="message_id" class="alert alert-info" align="center"><strong>Результатів немає. Спробуйте спростити фільтр.</strong></div>');
                     if (p.onSuccess) p.onSuccess(this);
 					return false;
 				}

@@ -50,12 +50,6 @@
 		});		
 		<%end%>
 
-
-
-
-
-
-	
 		$('#tyre_brand_typeahead').typeahead({
 			source: <%=$tyre_brand_name.to_json%>,
 			items: 20,
@@ -1091,7 +1085,7 @@
 			</div>	
 		<%else%>
 			<div id="message_id" class="alert alert-info" align="center">
-				<strong><%=@message%></strong>
+				<strong><%=@message_no_data%></strong>
     		</div>
 		<%end%>
 	</div>	
