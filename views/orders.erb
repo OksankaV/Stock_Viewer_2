@@ -118,6 +118,7 @@
 		
 		<%if (session[:show_modal] == 'show_edit_modal')%>
 			$.get("/edit_modal_form",
+				{item: <%=@edit_item%>},
                	function(data) {$('#edit_order_modal .modal-body').html(data)}
             );
             $('div').delegate('#edit_order_modal','shown', function (e) {
@@ -198,20 +199,24 @@
 			
 
 		$("#add_buyer_button").click(function() {
+			var send_form = true;
 			if ($('#input_buyer').val() == "")
 			{
 				alert ("Вкажіть покупця");
+				send_form = false;
 				return false;
 			}
 			if ($('#input_telephone').val() == "")
 			{
 				alert ("Вкажіть номер телефону");
+				send_form = false;
 				return false;
 			}
 			
 			if (jQuery.inArray($('#input_buyer').val(), buyers_array) >= 0)
 			{
 				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
+				send_form = false;
 				return false;
 			}
 			
@@ -230,6 +235,7 @@
 			{
 				var confirm_telephone = confirm("Покупець '" + already_added_buyers_array + "' з номером телефона '" + $('#input_telephone').val() + "' вже існує, ви впевнені, що хочете додати ще одного?");
 				if (confirm_telephone == false)
+					send_form = false;
 					return false;
 			}
 			
@@ -237,8 +243,30 @@
 			{
 				var confirm_telephone = confirm("Покупці '" + already_added_buyers_array + "' з номером телефона '" + $('#input_telephone').val() + "' вже існують, ви впевнені, що хочете додати ще одного?");
 				if (confirm_telephone == false)
+				{
+					send_form = false;
 					return false;
+				}	
 			}
+			
+			if (send_form == true)
+			{
+				$.post(
+					'/add_new_buyer',
+					$('#add_new_buyer_form').serialize(),
+					function(data) {
+						buyers_array.push(data);
+						if ($('#shown_modal').val() == "show_add_modal")
+							$('#typeahead_buyer').val(data);
+						if ($('#shown_modal').val() == "show_edit_modal")
+							$('#edit_buyer').val(data);
+						$('#add_buyer_cencel').click();
+					}
+				);
+			} else {
+				return false;
+			}
+			
 		});
 		
 		$('#add_buyer_cencel').click(function(){
@@ -395,7 +423,7 @@
 		<form id="add_new_order_form" action="/add_new_order" method="post" onsubmit="return validate_order_form()">      
 			<div class="row-fluid">   
 				<div class="span18 lightblue">
-					<label>Виберіть покупця зі списку за назвою чи телефоном, або додайте нового</label>
+					<label>Виберіть покупця за назвою чи телефоном, або додайте нового</label>
 					<input id="typeahead_buyer" name="typeahead_buyer" type="text" class="input-block-level" autocomplete="off" data-provide="typeahead" placeholder="Почніть вводити..." style="font-size: 12px;" value="<%=session[:buyer_name]%>">
 				</div>
 				<div class="span6 lightblue">
@@ -504,7 +532,7 @@
 	</div>
 	<div class="modal-footer">
 		<button id="add_buyer_cencel" class="btn" data-dismiss="modal" aria-hidden="true">Відмінити</button>
-		<input id="add_buyer_button" type="submit" form="add_new_buyer_form" class="btn btn-primary" value="Зберегти">
+		<input id="add_buyer_button" form="add_new_buyer_form" class="btn btn-primary" value="Зберегти">
 	</div>
 </div>
 

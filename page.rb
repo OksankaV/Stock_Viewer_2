@@ -1329,19 +1329,15 @@ get '/orders' do
 		
 		select_data_from_orders_db()
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
-		p params[:buyer_redirect]
 		if params[:buyer_redirect] == nil
 			session.delete(:show_modal)
-			session.delete(:buyer_name)
 			session.delete(:edit_item)
 		end
-		p "--------------------------"
 		if params[:view_all_orders] == nil
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => "false"}]
 		else
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => params[:view_all_orders]}]
 		end
-		p session
 		erb :orders
 	end	
 end 
@@ -1445,8 +1441,7 @@ end
 get '/edit_modal_form' do
 	if admin?
 		protected!
-		@edit_item = session[:edit_item]
-		@edit_item.gsub!(/row/,'')
+		@edit_item = params[:item].gsub!(/row/,'')
 
 		select_edit_row = $db_orders.execute("SELECT * FROM orders WHERE id=?", [@edit_item]).flatten
 		@edit_data_hash = {}
@@ -1533,7 +1528,9 @@ end
 post '/add_new_buyer' do
 	if admin?
 		protected!
-
+		
+		p "======"
+		p params
 		input_params_hash = {}
 		params.each_pair do |input_param_key, input_param_value|
 			input_params_hash[input_param_key] = input_param_value
@@ -1545,8 +1542,8 @@ post '/add_new_buyer' do
 		else
 			session[:show_modal] = input_params_hash['shown_modal']
 			session[:edit_item] = input_params_hash["edit_item"].gsub!(/row/,'')
-			session[:buyer_name] = input_params_hash["input_buyer"]
-			redirect(URI.escape('/orders?buyer_redirect=true'))
+			return input_params_hash["input_buyer"]
+			#redirect(URI.escape('/orders?buyer_redirect=true'))
 		end	
 	end
 end
@@ -1653,7 +1650,7 @@ post '/edit_buyer' do
 			input_params_hash[param_key] = input_param_value
 			input_params_hash[param_key] = "" if input_param_value == nil
 		end
-		$db_orders.execute("UPDATE buyers SET name=:name, fullname=:fullname, telephone=:telephone, city=:city, contact_person=:contact_person, notes=:buyer_notes WHERE name=:item", input_params_hash)
+		$db_orders.execute("UPDATE buyers SET name=:name, fullname=:fullname, telephone=:telephone, city=:city, contact_person=:contact_person, notes=:notes WHERE name=:item", input_params_hash)
 		redirect('/buyers')
 	end
 end
