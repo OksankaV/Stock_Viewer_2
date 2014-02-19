@@ -1330,8 +1330,7 @@ get '/orders' do
 		
 		select_data_from_orders_db()
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
-		p "-----------"
-		p @error_date_rows = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date <= sent").flatten
+		@error_date_rows = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date <= sent").flatten
 		if params[:show_modal] == nil
 			@show_modal = ""
 		else

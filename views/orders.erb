@@ -38,23 +38,16 @@
 			useRp: true,
 			rp: 30,
 			showTableToggleBtn: true,
+			onSuccess: error_date(),
 			width: 200,
 			height: 660
+
 		});
 		
+		
 		<%end%>
 		
-		<%if @error_date_rows.empty? == false%>
-			var error_date_rows_array = <%=@error_date_rows%>;
-			for (i=0;i<error_date_rows_array.length-1;i++)
-			{
-				if ($('tr[id=row' + error_date_rows_array[i] + ']').length > 0)
-				{
-					$('tr[id=row' + error_date_rows_array[i] + ']').addClass('error_date');
-					$('tr[id=row' + error_date_rows_array[i] + ']').attr( "title", "ERROR" );
-				}	
-			}
-		<%end%>
+
 		
 		<%if @order_item != ""%>
 			$('#add_order_link').click();
@@ -302,9 +295,27 @@
 			$(this).addClass('trSelected');
 			edit_order($(this));
 		});
-
+		
 	
 	});
+	
+	
+		$(document).ajaxSuccess(function() {
+		<%if @error_date_rows.empty? == false%>
+			error_date();
+		<%end%>
+		});
+	function error_date() {
+		var error_date_rows_array = <%=@error_date_rows%>;
+		for (i=0;i<error_date_rows_array.length-1;i++)
+		{
+			if ($('tr[id=row' + error_date_rows_array[i] + ']').length > 0)
+			{
+				$('tr[id=row' + error_date_rows_array[i] + ']').addClass('error_date');
+				$('tr[id=row' + error_date_rows_array[i] + ']').attr( "title", "Застереження! Дата планового отримання співпадає або менша за дату відвантаження." );
+			}	
+		}
+	}
 	
 
 	
@@ -410,8 +421,9 @@
 		width: 70px;
 		padding: 2px;
 	}
-	.error_date{
-		bgcolor: yellow;
+	.error_date
+	{
+		background-color: #DFF0D8 !important;
 	}
 </style>
 <%end%>
