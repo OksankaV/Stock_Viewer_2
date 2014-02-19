@@ -10,7 +10,7 @@
 				{display: "<%=Buyers_table_headers['telephone']%>", name : 'telephone', width : 150, sortable : true, align: 'left'},
 				{display: "<%=Buyers_table_headers['city']%>", name : 'city', width : 150, sortable : true, align: 'left'},
 				{display: "<%=Buyers_table_headers['contact_person']%>", name : 'contact_person', width : 150, sortable : true, align: 'left'},
-				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'notes', width : 200, sortable : true, align: 'left'},
+				{display: "<%=Buyers_table_headers['notes']%>", name : 'notes', width : 200, sortable : true, align: 'left'},
 				],
 			buttons : [
 				{name: 'Додати нового покупця', bimage: '/images/add-icon.png', onpress: add_new_buyer},
@@ -21,10 +21,6 @@
 				{separator: true},
 				{name: 'Переглянути список замовлень', bimage: '/images/orders-icon.png', onpress: orders_list},
 				{separator: true}
-				],
-			searchitems : [
-				{display: "<%=Buyers_table_headers['buyer']%>", name : 'name', isdefault: true},
-				{display: "<%=Buyers_table_headers['buyer_notes']%>", name : 'notes'}
 				],
 			sortname: "name",
 			sortorder: "asc",
@@ -107,6 +103,7 @@
 		}	
 		
 
+
 		
 		$("#add_new_buyer_button").click(function() {
 			if ($('#input_buyer').val() == "")
@@ -120,9 +117,17 @@
 				return false;
 			}
 			
-			var buyers_telephones_array = <%=@buyers_telephones.to_json%>;	
+			var buyers_telephones_array = <%=@buyers_telephones.to_json%>;
+
+			var buyers_array = new Array();
+			var telephones_array = new Array();
+			for (i=0; i<buyers_telephones_array.length; i++)
+			{
+				buyers_array[i] = buyers_telephones_array[i][0];
+				telephones_array[i] = buyers_telephones_array[i][1];
+			}
 			
-			if (jQuery.inArray($('#input_buyer').val(), buyers_telephones_array[0]) >= 0)
+			if (jQuery.inArray($('#input_buyer').val(), buyers_array) >= 0)
 			{
 				alert ("Покупець '" + $('#input_buyer').val() + "' вже існує, неможливо додати.");
 				return false;
@@ -130,11 +135,11 @@
 			
 			var already_added_buyers_array = new Array();
 			buyer_index = 0;
-			for (i=0; i<buyers_telephones_array.length; i++)
+			for (i=0; i<telephones_array.length; i++)
 			{
-				if (jQuery.inArray($('#input_telephone').val(), buyers_telephones_array[i][1].split(/\s*,\s*/)) >= 0)
+				if (jQuery.inArray($('#input_telephone').val(), telephones_array[i].split(/\s*,\s*/)) >= 0)
 				{
-					already_added_buyers_array[buyer_index] = buyers_telephones_array[i][0];
+					already_added_buyers_array[buyer_index] = buyers_array[i];
 					buyer_index += 1;
 				}
 			}

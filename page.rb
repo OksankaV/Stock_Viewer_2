@@ -8,8 +8,6 @@ require 'net/http'
 require 'uri'
 require 'axlsx'
 
-enable :sessions
-
 require_relative 'public/lib/content'
 
 set :protection, :except => :ip_spoofing
@@ -1297,42 +1295,53 @@ get '/orders' do
 
 		if params[:item] == nil
 			@order_item = ""
-			session.delete(:order_hash)
+			if params[:order_hash] == nil
+				@order_hash = {}
+			else	
+				@order_hash = JSON.parse(params[:order_hash])
+			end	
 		else
 			@order_item = params[:item].gsub(/row/,'')
 			order_array = $db.execute("SELECT dimensiontype, brand, family, supplier, sp, spc, bp FROM price where id = ?",@order_item).flatten
-			order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'bp' => order_array[6]}
-			order_hash.each_pair do |order_key, order_value|
+			@order_hash = {'article' => (order_array[0] + " " + order_array[1] + " " + order_array[2]), 'supplier' => order_array[3], 'sp' => order_array[4], 'spc' => order_array[5], 'bp' => order_array[6]}
+			@order_hash.each_pair do |order_key, order_value|
 				if order_value.class == Float	
-	  				order_hash[order_key] = order_value.round(2)
+	  				@order_hash[order_key] = order_value.round(2)
 		  		end	
-		  		if (order_key == 'sp') and (order_hash['sp'] != 0 or order_hash['sp'] != "невідомо")
-		  			if order_hash['spc'] == "1"
-		  				order_hash[order_key] = order_hash[order_key].ceil.to_s + " грн."
-		  			elsif  order_hash['spc'] == "2"
-		 				order_hash[order_key] = (order_hash[order_key] + 0.0499999).round(1).to_s + " $"
-		  			elsif  order_hash['spc'] == "3"
-		  				order_hash[order_key] = (order_hash[order_key] + 0.0499999).round(1).to_s + " &euro;"
-		  			elsif  order_hash['spc'] == "4"
-		  				order_hash[order_key] = (order_hash[order_key] + 0.0499999).round(1).to_s + " PLN"
+		  		if (order_key == 'sp') and (@order_hash['sp'] != 0 or @order_hash['sp'] != "невідомо")
+		  			if @order_hash['spc'] == "1"
+		  				@order_hash[order_key] = @order_hash[order_key].ceil.to_s + " грн."
+		  			elsif  @order_hash['spc'] == "2"
+		 				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " $"
+		  			elsif  @order_hash['spc'] == "3"
+		  				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " &euro;"
+		  			elsif  @order_hash['spc'] == "4"
+		  				@order_hash[order_key] = (@order_hash[order_key] + 0.0499999).round(1).to_s + " PLN"
 		  			end
 		  		end
-		  		if (order_key == 'sp') and (order_hash['sp'] == 0 or order_hash['sp'] == "невідомо")
-		  			order_hash[order_key] = "невідомо"	
+		  		if (order_key == 'sp') and (@order_hash['sp'] == 0 or @order_hash['sp'] == "невідомо")
+		  			@order_hash[order_key] = "невідомо"	
 		  		end
 		  		if (order_key == 'supplier')
-		  			order_hash[order_key] = order_hash[order_key].gsub(/№/,"")
+		  			@order_hash[order_key] = @order_hash[order_key].gsub(/№/,"")
 		  		end
 			end
-			session[:order_hash] = order_hash
 		end		
 		
 		select_data_from_orders_db()
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
-		if params[:buyer_redirect] == nil
-			session.delete(:show_modal)
-			session.delete(:edit_item)
-		end
+		p "-----------"
+		p @error_date_rows = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date <= sent").flatten
+		if params[:show_modal] == nil
+			@show_modal = ""
+		else
+			@show_modal = params[:show_modal]
+		end	
+		if params[:edit_item] == nil
+			@edit_item = ""
+		else
+			@edit_item = params[:edit_item].gsub!(/row/,'')
+		end	
 		if params[:view_all_orders] == nil
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => "false"}]
 		else
@@ -1540,8 +1549,6 @@ post '/add_new_buyer' do
 		if input_params_hash['shown_modal'] == nil or input_params_hash['shown_modal'] == ""
 			redirect('/buyers')
 		else
-			session[:show_modal] = input_params_hash['shown_modal']
-			session[:edit_item] = input_params_hash["edit_item"].gsub!(/row/,'')
 			return input_params_hash["input_buyer"]
 			#redirect(URI.escape('/orders?buyer_redirect=true'))
 		end	
