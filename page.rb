@@ -39,6 +39,8 @@ Buyers_table_columns = ['name','notes', 'fullname', 'telephone', 'city', 'contac
 Buyers_table_headers = {'buyer' =>'Скорочена назва', 'fullname' => 'Повна назва', 'telephone' => 'Телефон', 'city' => 'Місто', 'contact_person' => 'Контактна особа', 'notes' => 'Нотатки'}
 Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
+Orders_table_excel_columns = ['buyer', 'fullname', 'telephone', 'city','article','amount', 'supplier', 'sent', 'expected_receive_date','post_name','track_id']
+
 def select_data_from_db()
 	if File.exists?("../data/tyre.db")
 		$db = SQLite3::Database.new("../data/tyre.db")
@@ -1343,8 +1345,17 @@ get '/orders' do
 		end	
 		if params[:view_all_orders] == nil
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => "false"}]
+			expected_receive_date_array = $db_orders.execute("SELECT expected_receive_date FROM orders WHERE (receive_date ISNULL or receive_date IS '')").flatten	
 		else
 			@view_all_orders = [{'name' => 'view_all_orders', 'value' => params[:view_all_orders]}]
+			expected_receive_date_array = $db_orders.execute("SELECT expected_receive_date FROM orders").flatten.uniq
+		end
+		@expected_receive_date_array = []
+		expected_receive_date_array.each do |date_value|
+			if date_value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten.empty? == false 
+			  	date = date_value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten
+			  	@expected_receive_date_array.push(Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%m/%d/%Y"))
+			end	
 		end
 		erb :orders
 	end	
@@ -1536,9 +1547,7 @@ end
 post '/add_new_buyer' do
 	if admin?
 		protected!
-		
-		p "======"
-		p params
+
 		input_params_hash = {}
 		params.each_pair do |input_param_key, input_param_value|
 			input_params_hash[input_param_key] = input_param_value
@@ -1659,6 +1668,49 @@ post '/edit_buyer' do
 		$db_orders.execute("UPDATE buyers SET name=:name, fullname=:fullname, telephone=:telephone, city=:city, contact_person=:contact_person, notes=:notes WHERE name=:item", input_params_hash)
 		redirect('/buyers')
 	end
+end
+
+post '/orders_excel' do
+	if admin?
+	protected!
+		expected_receive_date_hash = {:first_date => params[:expected_receive_date_first], :second_date => params[:expected_receive_date_second]}
+		expected_receive_date_hash.each_pair do |key,value|
+			date = value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
+		  	expected_receive_date_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%Y-%m-%d")
+		end
+		if params[:view_all_orders] == nil or params[:view_all_orders] == "false"
+			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date) AND (receive_date ISNULL or receive_date IS ''))", expected_receive_date_hash)
+		else
+			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date))", expected_receive_date_hash)
+		end
+		
+		all_data_array = []
+		select_all_data.each do |one_row_data|
+			data_hash = {}
+			one_row_data.each_index do |index|
+				data_hash[Orders_table_excel_columns[index]] = one_row_data[index]
+			end
+			all_data_array.push(data_hash)
+		end
+		
+		temp = Tempfile.new("orders.xls")
+		xls_file = Axlsx::Package.new
+		xls_file.workbook do |wb|
+		  # define your regular styles
+		  styles = wb.styles
+		  header = styles.add_style(:bg_color => '00CCFF', :b => true, :border => { :style => :thin, :color => "00" }, :alignment => { :horizontal => :center, :vertical => :center , :wrap_text => true})
+		  default = styles.add_style(:border => { :style => :thin, :color => "00" }, :alignment => { :horizontal => :left, :vertical => :center , :wrap_text => true})
+
+		  wb.add_worksheet(:name => 'orders') do  |ws|
+			ws.add_row [Orders_table_headers['buyer'], Buyers_table_headers['fullname'], Buyers_table_headers['telephone'], Buyers_table_headers['city'], Orders_table_headers['article'], Orders_table_headers['amount'], Orders_table_headers['supplier'], Orders_table_headers['sent'], Orders_table_headers['expected_receive_date'],Orders_table_headers['post_name'],Orders_table_headers['track_id']],  :style => header
+			all_data_array.each do |row_hash|
+				ws.add_row [row_hash['buyer'], row_hash['fullname'], row_hash['telephone'], row_hash['city'], row_hash['article'], row_hash['amount'], row_hash['supplier'], row_hash['sent'], row_hash['expected_receive_date'],row_hash['post_name'],row_hash['track_id']], :style => default 
+			end	
+		  end
+		end
+		xls_file.serialize temp.path
+		send_file temp.path, :filename => "orders.xls", :type => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    end 
 end
 
 __END__

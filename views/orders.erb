@@ -20,11 +20,13 @@
 				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 80, sortable : true, align: 'left'}
 				],
 			buttons : [
-				{name: 'Додати нове замовлення', bimage: '/images/add-icon.png', onpress: add_new_order},
+				{name: 'Додати нове', bimage: '/images/add-icon.png', onpress: add_new_order},
 				{separator: true},
-				{name: 'Видалити вибрані замовлення', bimage: '/images/delete-icon.png', onpress: delete_selected_orders},
+				{name: 'Видалити', bimage: '/images/delete-icon.png', onpress: delete_selected_orders},
 				{separator: true},
-				{name: 'Редагувати замовлення', bimage: '/images/edit-icon.png', onpress: edit_order_in_table},
+				{name: 'Редагувати', bimage: '/images/edit-icon.png', onpress: edit_order_in_table},
+				{separator: true},
+				{name: 'Зберегти у Excel-файл', bimage: '/images/excel-icon.png', onpress: excel_button_click},
 				{separator: true},
 				{name: 'Переглянути всі замовлення', bclass: 'view_all_orders_button', bimage: '/images/orders-icon.png', onpress: view_all_orders},
 				{separator: true},
@@ -296,15 +298,66 @@
 			edit_order($(this));
 		});
 		
+		
+		$('#orders_excel_button').click(function() {
+			if ($('#expected_receive_date_first').val() == "")
+			{
+				alert ("Вкажіть початкову дату");
+				return false;
+			}
+			
+			if ($('#expected_receive_date_second').val() == "")
+			{
+				alert ("Вкажіть кінцеву дату");
+				return false;
+			}
+			
+		
+			var first_date_array = $('#expected_receive_date_first').val().match(/^(\d*)\/(\d*)\/(\d*)$/);
+			var second_date_array = $('#expected_receive_date_second').val().match(/^(\d*)\/(\d*)\/(\d*)$/);
+			
+			var first_date = new Date(first_date_array[3],first_date_array[2]-1,first_date_array[1]);
+			var second_date = new Date(second_date_array[3],second_date_array[2]-1,second_date_array[1]);
+
+			
+			if (first_date > second_date)
+			{
+				alert ("Кінева дата не може бути менша за початкову");
+				return false;
+			}
+			
+			var expected_receive_date_array = <%=@expected_receive_date_array%>;
+			var check_date = false;
+			for (i=0;i<expected_receive_date_array.length;i++)
+			{
+				if (expected_receive_date_array[i] != "")
+				{
+					expected_receive_date_array[i] = new Date(expected_receive_date_array[i]);
+					
+					if ((expected_receive_date_array[i] <= second_date) && (expected_receive_date_array[i] >= first_date))
+					{
+						check_date = true;
+					}
+				}
+			}
+			if (check_date == false)
+			{	
+				alert ("Замовлень з вказаним діапазоном дат планого отримання не існує");
+				return false;
+			}
+
+		});
+		
 	
 	});
 	
 	
-		$(document).ajaxSuccess(function() {
-		<%if @error_date_rows.empty? == false%>
-			error_date();
-		<%end%>
-		});
+	$(document).ajaxSuccess(function() {
+	<%if @error_date_rows.empty? == false%>
+		error_date();
+	<%end%>
+	});
+	
 	function error_date() {
 		var error_date_rows_array = <%=@error_date_rows%>;
 		for (i=0;i<error_date_rows_array.length-1;i++)
@@ -312,84 +365,87 @@
 			if ($('tr[id=row' + error_date_rows_array[i] + ']').length > 0)
 			{
 				$('tr[id=row' + error_date_rows_array[i] + ']').addClass('error_date');
-				$('tr[id=row' + error_date_rows_array[i] + ']').attr( "title", "Застереження! Дата планового отримання співпадає або менша за дату відвантаження." );
+				$('tr[id=row' + error_date_rows_array[i] + ']').attr( "title", "Увага! Дата планового отримання співпадає або менша за дату відвантаження." );
 			}	
 		}
 	}
-	
 
-	
 	function add_new_order(com, grid) 
-		{	
-			$('#add_order_link').click();
-		}		
+	{	
+		$('#add_order_link').click();
+	}		
 		
-		function edit_order_in_table(com, grid)
-		{
-			edit_order($('.trSelected', grid));
-		}
+	function edit_order_in_table(com, grid)
+	{
+		edit_order($('.trSelected', grid));
+	}
 
-		function edit_order(edit_object) 
+	function edit_order(edit_object) 
+	{
+		if (edit_object.length == '0')
 		{
-			if (edit_object.length == '0')
-			{
-				alert('На вибрано жодного замовлення.');
-			}
-			else if (edit_object.length == '1')
-			{
-				var edit_item = edit_object.attr("id");
-				
-				$.get("/edit_modal_form",
-                	{item: edit_item},
-                	function(data) {$('#edit_order_modal .modal-body').html(data)}
-                );
-                $('#edit_item').val(edit_item);
-                $('#edit_order_link').click();
-                $('#shown_modal').val("show_edit_modal");
-			}
-			else 
-			{
-				alert('Не можливо редагувати відразу декілька замовлень, виберіть, будь ласка, лише одне замовлення.');
-			}			
+			alert('На вибрано жодного замовлення.');
 		}
-		
-		function delete_selected_orders(com, grid)
+		else if (edit_object.length == '1')
 		{
-			if ($('.trSelected', grid).length == '0')
+			var edit_item = edit_object.attr("id");
+			
+			$.get("/edit_modal_form",
+               	{item: edit_item},
+				function(data) {$('#edit_order_modal .modal-body').html(data)}
+			);
+			$('#edit_item').val(edit_item);
+			$('#edit_order_link').click();
+			$('#shown_modal').val("show_edit_modal");
+		}
+		else 
+		{
+			alert('Не можливо редагувати відразу декілька замовлень, виберіть, будь ласка, лише одне замовлення.');
+		}			
+	}
+		
+	function delete_selected_orders(com, grid)
+	{
+		if ($('.trSelected', grid).length == '0')
+		{
+			alert('На вибрано жодного замовлення');
+		}
+		else
+		{
+			var confirm_value = confirm('Ви впевнені, що хочете видалити вибрані замовлення?');
+			if (confirm_value)
 			{
-				alert('На вибрано жодного замовлення');
-			}
-			else
-			{
-				var confirm_value = confirm('Ви впевнені, що хочете видалити вибрані замовлення?');
-				if (confirm_value)
-				{
-					var items = $('.trSelected',grid);
-                    var itemlist = new Array();
-                    for(i=0;i<items.length;i++){
-                        itemlist[i] = items[i].id;	 	
-                    }
-					$.get("/delete_orders",
-                       {items: itemlist},
-                       function(data){ location.reload();}
-                    );
+				var items = $('.trSelected',grid);
+                var itemlist = new Array();
+				for(i=0;i<items.length;i++){
+					itemlist[i] = items[i].id;	 	
 				}
-			}			
-		}
+				$.get("/delete_orders",
+					{items: itemlist},
+					function(data){ location.reload();}
+				);
+			}
+		}			
+	}
 		
-		function buyer_list(com, grid) 
-		{	
-			window.location.href='/buyers'
-		}
+	function buyer_list(com, grid) 
+	{	
+		window.location.href='/buyers'
+	}
 		
-		function view_all_orders(com,grid)
-		{
-			var view_all_orders = <%=@view_all_orders[0]['value']%>
-			if (view_all_orders == true)
-            	window.location.href = "/orders"
-            else
-           		window.location.href = "/orders?view_all_orders=true"	
-		}
+	function view_all_orders(com,grid)
+	{
+		var view_all_orders = <%=@view_all_orders[0]['value']%>
+		if (view_all_orders == true)
+			window.location.href = "/orders"
+		else
+			window.location.href = "/orders?view_all_orders=true"	
+	}
+	
+	function excel_button_click(com, grid) 
+	{	
+		$('#excel_button_link').click();
+	}	
 		
 
 </script>
@@ -423,7 +479,7 @@
 	}
 	.error_date
 	{
-		background-color: #DFF0D8 !important;
+		background-color: #EED3D7 !important;
 	}
 </style>
 <%end%>
@@ -444,6 +500,7 @@
 <a id="edit_order_link" href="#edit_order_modal" data-toggle="modal" hidden></a>
 <a id="delete_order_link" href="#delete_order_modal" data-toggle="modal" hidden></a>
 <a id="add_buyer_link" href="#add_modal_buyer" data-toggle="modal" hidden></a>
+<a id="excel_button_link" href="#orders_excel_modal" data-toggle="modal" hidden></a>
 
 <div id="add_order_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-header">
@@ -578,6 +635,49 @@
 		<button id="edit_order_cencel" class="btn" data-dismiss="modal" aria-hidden="true">Відмінити</button>
 		<button id="edit_order_button" form="edit_order_form" class="btn btn-primary">Зберегти</button>
 		
+	</div>
+</div>
+
+<div id="orders_excel_modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3>Зберегти замовлення у Excel-файл</h3>
+	</div>
+	<div class="modal-body">
+		<form id="orders_excel_form" action="/orders_excel" method="post">
+			<div class="row-fluid">
+				<div class="offset1 span23">
+					<h5>Виберіть діапазон дат планового отримання товару</h5>
+				</div>
+			</div>
+			<div class="row-fluid">   
+				<div class="offset1 span6">
+					<label>Початкова дата</label>
+					<div class="row-fluid input-append date"  data-date-format="dd/mm/yyyy">
+						<input id="expected_receive_date_first" name="expected_receive_date_first" class="input-block-level span19" type="text" autocomplete="off" readonly>
+						<div class="add-on">
+							<div align="center"><i class="icon-calendar"></i></div>	
+						</div>
+					</div>	
+				</div>
+
+				<div class="span6">
+					<label>Кінцева дата</label>
+					<div class="row-fluid input-append date"  data-date-format="dd/mm/yyyy">
+						<input id="expected_receive_date_second" name="expected_receive_date_second" class="input-block-level span19" type="text" autocomplete="off" readonly>
+						<div class="add-on">
+							<div align="center"><i class="icon-calendar"></i></div>	
+						</div>
+					</div>	
+				</div>
+			</div>
+			<input id="view_all_orders" name="view_all_orders" type="hidden" value="<%=@view_all_orders[0]['value']%>">
+		</form>
+	
+	</div>
+	<div class="modal-footer">
+		<button id="orders_excel_cencel" class="btn" data-dismiss="modal" aria-hidden="true">Відмінити</button>
+		<input id="orders_excel_button" type="submit" form="orders_excel_form" class="btn btn-primary" value="Зберегти у Excel-файл">
 	</div>
 </div>
 
