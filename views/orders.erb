@@ -12,12 +12,12 @@
 				{display: "<%=Orders_table_headers_cut['amount']%>", name : 'amount', width : 50, sortable : true, align: 'left'},
 				{display: "<%=Orders_table_headers_cut['supplier']%>", name : 'supplier', width : 50, sortable : true, align: 'left'},
 				{display: "<%=Orders_table_headers_cut['reserve_date']%>", name : 'reserve_date', width : 50, sortable : true, align: 'left'},
-				{display: "<%=Orders_table_headers_cut['sent']%>", name : 'sent', width : 50, sortable : true, align: 'left'},
+				{display: "<%=Orders_table_headers_cut['sent_date']%>", name : 'sent_date', width : 50, sortable : true, align: 'left'},
 				{display: "<%=Orders_table_headers_cut['expected_receive_date']%>", name : 'expected_receive_date', width : 50, sortable : true, align: 'left'},
 				{display: "<%=Orders_table_headers_cut['receive_date']%>", name : 'receive_date', width : 50, sortable : true, align: 'left'},
 				{display: "<%=Orders_table_headers_cut['post_name']%>", name : 'post_name', width : 80, sortable : true, align: 'left'},
 				{display: "<%=Orders_table_headers_cut['track_id']%>", name : 'track_id', width : 80, sortable : true, align: 'left'},
-				{display: "<%=Orders_table_headers_cut['specification']%>", name : 'specification', width : 80, sortable : true, align: 'left'}
+				{display: "<%=Orders_table_headers_cut['notes']%>", name : 'notes', width : 80, sortable : true, align: 'left'}
 				],
 			buttons : [
 				{name: 'Додати нове', bimage: '/images/add-icon.png', onpress: add_new_order},
@@ -43,13 +43,10 @@
 			onSuccess: error_date(),
 			width: 200,
 			height: 660
-
 		});
-		
 		
 		<%end%>
 		
-
 		
 		<%if @order_item != ""%>
 			$('#add_order_link').click();
@@ -85,7 +82,7 @@
 				buyer_index = 0;
 				for (i=0; i<telephones_array.length; i++)
 				{
-					if (telephones_array[i].search(item) != -1)
+					if (telephones_array[i].search(new RegExp(item, "i")) != -1)
 					{
 						select_buyers_array[buyer_index] = buyers_array[i];
 						buyer_index += 1;
@@ -93,7 +90,7 @@
 				}
 				for (i=0; i<buyers_array.length; i++)
 				{
-					if (buyers_array[i].search(item) != -1)
+					if (buyers_array[i].search(new RegExp(item, "i")) != -1)
 					{
 						select_buyers_array[buyer_index] = buyers_array[i];
 						buyer_index += 1;
@@ -200,11 +197,23 @@
 				alert ("Неможливо додати, назва складу повинна містити тільки цифри та знаки '.', '-'");
 				return false;
 			}
-			if (($('#edit_sent').val() != "") && (($('#edit_expected_receive_date').val() == "")))
+			if (($('#edit_sent_date').val() != "") && (($('#edit_expected_receive_date').val() == "")))
 			{
 				alert ("Введіть дату планового отримання, оскільки ви вже ввели дату відвантаження.");
 				return false;
-			}  
+			}
+	
+			
+			
+			var reg_exp_currency = /^\d+((\.+|,+)\d+)*\s*(₴|uah|UAH|г.*|Г.*|h\w*|H\w*|\$|usd|USD|d\w*|D\w*|д.*|Д.*|€|e\w*|E\w*|е.*|Е.*|є.*|Є.*|z.*|Z.*|p\w*|P\w*|з.*|З.*|п.*|П.*)+$/
+			if ((($('#edit_inprice').val().search(reg_exp_currency) == -1) && ($('#edit_inprice').val() != "" ))  || (($('#edit_outprice').val().search(reg_exp_currency) == -1) && ($('#edit_outprice').val() != "") || (($('#edit_transfered').val().search(reg_exp_currency) == -1) && ($('#edit_transfered').val() != "" ) ) || ($('#edit_transferprice').val().search(reg_exp_currency) == -1) && ($('#edit_transferprice').val() != "" )) )
+			{	
+				var confirm_currency = confirm("Ви не ввели або ввели неіснуючу назву валюти. Зберегти замовлення з вказаними валютами?");
+				if (confirm_currency == true)
+					return true;
+				else
+					return false;
+			}	
 		});
 			
 		
@@ -353,24 +362,52 @@
 
 		});
 		
+
+		
 	
 	});
 	
 	
 	$(document).ajaxSuccess(function() {
-	<%if @error_date_rows.empty? == false%>
+	<%if @error_date_rows_red.empty? == false%>
+		error_date();
+	<%end%>
+	<%if @error_date_rows_yellow.empty? == false%>
+		error_date();
+	<%end%>
+	<%if @error_date_rows_green.empty? == false%>
 		error_date();
 	<%end%>
 	});
 	
 	function error_date() {
-		var error_date_rows_array = <%=@error_date_rows%>;
-		for (i=0;i<error_date_rows_array.length-1;i++)
+		var error_date_rows_array_red = <%=@error_date_rows_red%>;
+		for (i=0;i<error_date_rows_array_red.length;i++)
 		{
-			if ($('tr[id=row' + error_date_rows_array[i] + ']').length > 0)
+			if ($('tr[id=row' + error_date_rows_array_red[i] + ']').length > 0)
 			{
-				$('tr[id=row' + error_date_rows_array[i] + ']').addClass('error_date');
-				$('tr[id=row' + error_date_rows_array[i] + ']').attr( "title", "Увага! Дата планового отримання співпадає або менша за дату відвантаження." );
+				$('tr[id=row' + error_date_rows_array_red[i] + ']').addClass('error_date_red');
+				$('tr[id=row' + error_date_rows_array_red[i] + ']').attr( "title", "Увага! Дата планового отримання прострочена або невідома." );
+			}	
+		}
+		
+		var error_date_rows_array_yellow = <%=@error_date_rows_yellow%>;
+		for (i=0;i<error_date_rows_array_yellow.length;i++)
+		{
+			if ($('tr[id=row' + error_date_rows_array_yellow[i] + ']').length > 0)
+			{
+				$('tr[id=row' + error_date_rows_array_yellow[i] + ']').addClass('error_date_yellow');
+				$('tr[id=row' + error_date_rows_array_yellow[i] + ']').attr( "title", "Увага! Сьогодні дата планового отримання замовлення." );
+			}	
+		}
+		
+		var error_date_rows_array_green = <%=@error_date_rows_green%>;
+		for (i=0;i<error_date_rows_array_green.length;i++)
+		{
+			if ($('tr[id=row' + error_date_rows_array_green[i] + ']').length > 0)
+			{
+				$('tr[id=row' + error_date_rows_array_green[i] + ']').addClass('error_date_green');
+				$('tr[id=row' + error_date_rows_array_green[i] + ']').attr( "title", "Увага! Завтра дата планового отримання замовлення." );
 			}	
 		}
 	}
@@ -482,9 +519,17 @@
 		width: 70px;
 		padding: 2px;
 	}
-	.error_date
+	.error_date_red
 	{
-		background-color: #EED3D7 !important;
+		background-color: #EDC9C9 !important;
+	}
+	.error_date_yellow
+	{
+		background-color: #EDEBC1 !important;
+	}
+	.error_date_green
+	{
+		background-color: #C1EDC2 !important;
 	}
 	.modal label, input, button, select, textarea {
    		font-size: 12px;
@@ -564,8 +609,8 @@
 			</div>
 			<div class="row-fluid">
 				<div class="span24">
-					<label><%=Orders_table_headers['order_notes']%></label>
-					<textarea type="text" id="input_order_notes" name="input_order_notes" class="span24" rows="2"></textarea>
+					<label><%=Orders_table_headers['notes']%></label>
+					<textarea type="text" name="input_notes" class="span24" rows="2"></textarea>
 				</div>
 			</div>
 			<input id="input_status" name="input_status" type="hidden" value="1">

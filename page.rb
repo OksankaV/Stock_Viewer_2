@@ -32,14 +32,17 @@ Header_data_field = {'id' => 'Вибрати', 'family' => 'Модель', 'seas
 Seasons = ["-", "літо", "зима", "в/c"]
 Seasons_images = ["question", "summer", "winter", "all_season"]
 Remain = Array.new(10000){ |index| index.to_s}
-Orders_table_headers_cut = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'К-ть', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Від-ня', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'План. от.', 'receive_date' => 'Факт. от.', 'post_name' => 'Трансп. комп.' , 'specification' => 'Уточнення'}
-Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)','rate' => 'Курс', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transferprice' => 'Оплачено нами', 'payed_by_buyer' => 'Оплачено клієнтом',  'payed_by_us' => 'Оплачено нами', 'status' => 'Статус', 'bank' => 'Банк', 'sent' => 'Відправлення', 'track_id' => '№ декларації', 'cash_flag' => 'Готівкова операція', 'order_notes' => 'Нотатки замовлення', 'buyer_notes' => 'Нотатки покупця', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'Планове отримання', 'receive_date' => 'Фактичне отримання', 'post_name' => 'Транспортна компанія' , 'specification' => 'Уточнення'}
-Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice','rate', 'outprice', 'transfered', 'transferprice', 'payed_by_buyer', 'payed_by_us', 'status', 'bank', 'sent', 'track_id', 'cash_flag', 'notes','post_name', 'specification', 'reserve_date', 'expected_receive_date', 'receive_date']
-Buyers_table_columns = ['name','notes', 'fullname', 'telephone', 'city', 'contact_person']
-Buyers_table_headers = {'buyer' =>'Скорочена назва', 'fullname' => 'Повна назва', 'telephone' => 'Телефон', 'city' => 'Місто', 'contact_person' => 'Контактна особа', 'notes' => 'Нотатки'}
-Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
 
-Orders_table_excel_columns = ['buyer', 'fullname', 'telephone', 'city','article','amount', 'supplier', 'sent', 'expected_receive_date','post_name','track_id']
+Orders_table_headers_cut = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'К-ть', 'supplier' => 'Склад', 'status' => 'Статус', 'sent_date' => 'Від-ня', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'План. от.', 'receive_date' => 'Факт. от.', 'post_name' => 'Трансп. комп.', 'track_id' => '№ декларації', 'cashless_flag' => 'Банківській переказ','taxes' => 'Податки' ,'notes' => 'Нотатки замовлення'}
+
+Orders_table_headers = {'issued' =>'Дата','buyer' =>'Покупець', 'article' => 'Товар', 'amount' => 'Кількість', 'supplier' => 'Склад', 'inprice' => 'Вхідна ціна (1 шт)', 'outprice' => 'Продажна ціна (1 шт)', 'transfered' => 'Оплачено клієнтом', 'transfered_date' => 'Дата', 'transfered_bank' => 'Банк', 'transferprice' => 'Оплачено нами', 'transferprice_date' => 'Дата', 'transferprice_bank' => 'Банк', 'status' => 'Статус', 'sent_date' => 'Відправлення', 'reserve_date' => 'Резерв', 'expected_receive_date' => 'Планове отримання', 'receive_date' => 'Фактичне отримання', 'post_name' => 'Транспортна компанія', 'track_id' => '№ декларації', 'cashless_flag' => 'Банківській переказ','taxes' => 'Податки' ,'notes' => 'Нотатки замовлення'}
+Orders_table_columns = ['id','issued','buyer', 'article', 'amount', 'supplier', 'inprice', 'outprice', 'transfered', 'transfered_date', 'transfered_bank', 'transferprice', 'transferprice_date', 'transferprice_bank', 'status', 'sent_date', 'reserve_date', 'expected_receive_date', 'receive_date', 'post_name', 'track_id', 'cashless_flag','taxes','notes']
+Status_values_array = ['нове', 'резерв', 'відправлено', 'отримано']
+Orders_table_excel_columns = ['buyer', 'fullname', 'telephone', 'city','article','amount', 'supplier', 'sent_date', 'expected_receive_date','post_name','track_id']
+
+Buyers_table_columns = ['name', 'fullname', 'telephone', 'city', 'contact_person', 'notes']
+Buyers_table_headers = {'buyer' =>'Скорочена назва', 'fullname' => 'Повна назва', 'telephone' => 'Телефон', 'city' => 'Місто', 'contact_person' => 'Контактна особа', 'notes' => 'Нотатки'}
+
 
 def select_data_from_db()
 	if File.exists?("../data/tyre.db")
@@ -1294,7 +1297,6 @@ end
 get '/orders' do
 	if admin?
 		protected!
-
 		if params[:item] == nil
 			@order_item = ""
 			if params[:order_hash] == nil
@@ -1332,7 +1334,11 @@ get '/orders' do
 		
 		select_data_from_orders_db()
 		@buyers_telephones = $db_orders.execute("SELECT name,telephone FROM buyers")
-		@error_date_rows = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date <= sent").flatten
+		today_date = Time.now.strftime("%Y-%m-%d")
+		tomorrow_date = (Time.now + (60 * 60 * 24)).strftime("%Y-%m-%d")
+		@error_date_rows_red = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date < (?) and (receive_date ISNULL or receive_date IS '') ", today_date).flatten
+		@error_date_rows_yellow = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date = (?) and (receive_date ISNULL or receive_date IS '')", today_date).flatten
+		@error_date_rows_green = $db_orders.execute("SELECT id FROM orders WHERE expected_receive_date = (?) and (receive_date ISNULL or receive_date IS '')", tomorrow_date).flatten
 		if params[:show_modal] == nil
 			@show_modal = ""
 		else
@@ -1357,6 +1363,7 @@ get '/orders' do
 			  	@expected_receive_date_array.push(Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%m/%d/%Y"))
 			end	
 		end
+		
 		erb :orders
 	end	
 end 
@@ -1396,7 +1403,7 @@ post '/orders_table' do
 		all_orders_array.each_index do |all_orders_array_index|
 			orders_hash = all_orders_array.at(all_orders_array_index)
 			orders_hash.each_pair do |orders_hash_key, orders_hash_value|	
-		  		if orders_hash_key == 'payed_by_buyer' or orders_hash_key == 'payed_by_us' or orders_hash_key == 'cash_flag'
+		  		if orders_hash_key == 'cashless_flag'
 		  			if orders_hash_value == 1
 		  				all_orders_array[all_orders_array_index][orders_hash_key] = "Так"
 		  			else
@@ -1406,7 +1413,7 @@ post '/orders_table' do
 		  		if orders_hash_key == 'status'
 		  			all_orders_array[all_orders_array_index][orders_hash_key] = Status_values_array[orders_hash_value.to_i]
 		  		end
-		  		if (orders_hash_key == 'issued' or orders_hash_key == 'reserve_date' or orders_hash_key == 'sent' or orders_hash_key == 'expected_receive_date' or orders_hash_key == 'receive_date') and orders_hash_value != "" and orders_hash_value != nil
+		  		if (orders_hash_key == 'issued' or orders_hash_key == 'reserve_date' or orders_hash_key == 'sent_date' or orders_hash_key == 'expected_receive_date' or orders_hash_key == 'receive_date' or orders_hash_key == 'transfered_date' or orders_hash_key == 'transferprice_date') and orders_hash_value != "" and orders_hash_value != nil
 					if orders_hash_value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten.empty? == false
 		  				date = orders_hash_value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
 		  				all_orders_array[all_orders_array_index][orders_hash_key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%d/%m")
@@ -1468,7 +1475,7 @@ get '/edit_modal_form' do
 			@edit_data_hash[Orders_table_columns[index]] = select_edit_row[index]
 		end
 		@edit_data_hash.each_pair do |key,value|
-			if (key == 'reserve_date' or key == 'sent' or key == 'expected_receive_date' or key == 'receive_date') and value != "" and value != nil
+			if (key == 'reserve_date' or key == 'sent_date' or key == 'expected_receive_date' or key == 'receive_date' or key == :transfered_date or key == :transferprice_date) and value != "" and value != nil
 				if value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten.empty? == false
 		  			date = value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
 		  			@edit_data_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%d/%m/%Y")
@@ -1508,10 +1515,10 @@ post '/edit_order' do
 		end
 
 		input_params_hash.each_pair do |key, value|
-			if (key == :payed_by_buyer) or (key == :payed_by_us) or (key == :cash_flag)
+			if (key == :cashless_flag)
 				input_params_hash[key] = boolean_hash_check(params,"edit_" + key.to_s)
 			end
-			if (key == :reserve_date or key == :sent or key == :expected_receive_date or key == :receive_date) and value != "" and value != nil
+			if (key == :reserve_date or key == :sent_date or key == :expected_receive_date or key == :receive_date or key == :transfered_date or key == :transferprice_date) and value != "" and value != nil
 				if value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten.empty? == false
 		  			date = value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
 		  			input_params_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%Y-%m-%d")
@@ -1519,13 +1526,30 @@ post '/edit_order' do
 		  		if value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten.empty? == false
 		  			date = value.scan(/(\d{4})\D(\d{2})\D(\d{2})/).flatten
 		  			input_params_hash[key] = Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%Y-%m-%d")
-		  		end	
-		  			
+		  		end		
 		  	end	
+		  	if (key == :inprice or key == :outprice or key == :transfered or key == :transferprice)
+				if value.scan(/^\d+((\.+|,+)\d+)*\s*(₴|uah|UAH|г.*|Г.*|h\w*|H\w*)*$/).flatten.empty? == false
+					currency = value.scan(/^(\d+((\.+|,+)\d+)*)\s*(₴|uah|UAH|г.*|Г.*|h\w*|H\w*)*$/).flatten
+					input_params_hash[key] = currency.first + " грн."
+				end
+				if value.scan(/^\d+((\.+|,+)\d+)*\s*(\$|usd|USD|d\w*|D\w*|д.*|Д.*)+$/).flatten.empty? == false
+					currency = value.scan(/^(\d+((\.+|,+)\d+)*)\s*(\$|usd|USD|d\w*|D\w*|д.*|Д.*)+$/).flatten
+					input_params_hash[key] = currency.first + " $"
+				end
+				if value.scan(/^\d+((\.+|,+)\d+)*\s*(€|e\w*|E\w*|е.*|Е.*|є.*|Є.*)+$/).flatten.empty? == false
+					currency = value.scan(/^(\d+((\.+|,+)\d+)*)\s*(€|e\w*|E\w*|е.*|Е.*|є.*|Є.*)+$/).flatten
+					input_params_hash[key] = currency.first + " €"
+				end
+				if value.scan(/^\d+((\.+|,+)\d+)*\s*(z\w*|Z\w*|p\w*|P\w*|з.*|З.*|п.*|П.*)+$/).flatten.empty? == false
+					currency = value.scan(/^(\d+((\.+|,+)\d+)*)\s*(z\w*|Z\w*|p\w*|P\w*|з.*|З.*|п.*|П.*)+$/).flatten
+					input_params_hash[key] = currency.first + " zł"
+				end
+
+			end
 		end
 		input_params_hash[:issued] = Time.now.strftime("%Y-%m-%d")
-
-		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, rate=:rate, outprice=:outprice, transfered=:transfered, transferprice=:transferprice, payed_by_buyer=:payed_by_buyer, payed_by_us=:payed_by_us, status=:status, bank=:bank, sent=:sent, track_id=:track_id, cash_flag=:cash_flag, notes=:order_notes, reserve_date=:reserve_date, expected_receive_date=:expected_receive_date, receive_date=:receive_date, post_name=:post_name, specification=:specification WHERE id=:id", input_params_hash)
+		$db_orders.execute("UPDATE orders SET issued=:issued, buyer=:buyer, article=:article, amount=:amount, supplier=:supplier, inprice=:inprice, outprice=:outprice, transfered=:transfered, transfered_date=:transfered_date, transfered_bank=:transfered_bank, transferprice=:transferprice, transferprice_date=:transferprice_date, transferprice_bank=:transferprice_bank, status=:status, sent_date=:sent_date, reserve_date=:reserve_date, expected_receive_date=:expected_receive_date, receive_date=:receive_date, post_name=:post_name, track_id=:track_id, cashless_flag=:cashless_flag, taxes=:taxes, notes=:notes WHERE id=:id", input_params_hash)
 		redirect('/orders')
 	end
 end
@@ -1539,7 +1563,7 @@ post '/add_new_order' do
 			input_params_hash[input_param_key] = 1 if input_param_value == "on"
 			input_params_hash[input_param_key] = "" if input_param_value == nil
 		end
-		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, reserve_date, expected_receive_date, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], Time.now.strftime("%Y-%m-%d"), input_params_hash["expected_receive_date"], input_params_hash["input_order_notes"]])
+		$db_orders.execute("INSERT INTO orders(issued, buyer, article, amount, supplier, inprice, outprice, status, reserve_date, expected_receive_date, notes) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [Time.now.strftime("%Y-%m-%d"),input_params_hash["typeahead_buyer"],input_params_hash["input_article"], input_params_hash["input_amount"], input_params_hash["input_supplier"], input_params_hash["input_inprice"],  input_params_hash["input_outprice"], input_params_hash["input_status"], Time.now.strftime("%Y-%m-%d"), input_params_hash["expected_receive_date"], input_params_hash["input_notes"]])
 		redirect('/orders')
 	end
 end
@@ -1679,9 +1703,9 @@ post '/orders_excel' do
 		  	expected_receive_date_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%Y-%m-%d")
 		end
 		if params[:view_all_orders] == nil or params[:view_all_orders] == "false"
-			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date) AND (receive_date ISNULL or receive_date IS ''))", expected_receive_date_hash)
+			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent_date, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date) AND (receive_date ISNULL or receive_date IS ''))", expected_receive_date_hash)
 		else
-			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date))", expected_receive_date_hash)
+			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent_date, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date))", expected_receive_date_hash)
 		end
 		
 		all_data_array = []
@@ -1702,9 +1726,9 @@ post '/orders_excel' do
 		  default = styles.add_style(:border => { :style => :thin, :color => "00" }, :alignment => { :horizontal => :left, :vertical => :center , :wrap_text => true})
 
 		  wb.add_worksheet(:name => 'orders') do  |ws|
-			ws.add_row [Orders_table_headers['buyer'], Buyers_table_headers['fullname'], Buyers_table_headers['telephone'], Buyers_table_headers['city'], Orders_table_headers['article'], Orders_table_headers['amount'], Orders_table_headers['supplier'], Orders_table_headers['sent'], Orders_table_headers['expected_receive_date'],Orders_table_headers['post_name'],Orders_table_headers['track_id']],  :style => header
+			ws.add_row [Orders_table_headers['buyer'], Buyers_table_headers['fullname'], Buyers_table_headers['telephone'], Buyers_table_headers['city'], Orders_table_headers['article'], Orders_table_headers['amount'], Orders_table_headers['supplier'], Orders_table_headers['sent_date'], Orders_table_headers['expected_receive_date'],Orders_table_headers['post_name'],Orders_table_headers['track_id']],  :style => header
 			all_data_array.each do |row_hash|
-				ws.add_row [row_hash['buyer'], row_hash['fullname'], row_hash['telephone'], row_hash['city'], row_hash['article'], row_hash['amount'], row_hash['supplier'], row_hash['sent'], row_hash['expected_receive_date'],row_hash['post_name'],row_hash['track_id']], :style => default 
+				ws.add_row [row_hash['buyer'], row_hash['fullname'], row_hash['telephone'], row_hash['city'], row_hash['article'], row_hash['amount'], row_hash['supplier'], row_hash['sent_date'], row_hash['expected_receive_date'],row_hash['post_name'],row_hash['track_id']], :style => default 
 			end	
 		  end
 		end
