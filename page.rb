@@ -1363,7 +1363,6 @@ get '/orders' do
 			  	@expected_receive_date_array.push(Time.new(date[0].to_i,date[1].to_i,date[2].to_i).strftime("%m/%d/%Y"))
 			end	
 		end
-		
 		erb :orders
 	end	
 end 
@@ -1697,15 +1696,32 @@ end
 post '/orders_excel' do
 	if admin?
 	protected!
-		expected_receive_date_hash = {:first_date => params[:expected_receive_date_first], :second_date => params[:expected_receive_date_second]}
-		expected_receive_date_hash.each_pair do |key,value|
+		excel_buyers_list = params[:excel_buyers_list]
+		selected_params_hash = {:first_date => params[:expected_receive_date_first], :second_date => params[:expected_receive_date_second]}
+		selected_params_hash.each_pair do |key,value|
 			date = value.scan(/(\d{2})\D(\d{2})\D(\d{4})/).flatten
-		  	expected_receive_date_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%Y-%m-%d")
+		  	selected_params_hash[key] = Time.new(date[2].to_i,date[1].to_i,date[0].to_i).strftime("%Y-%m-%d")
 		end
-		if params[:view_all_orders] == nil or params[:view_all_orders] == "false"
-			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent_date, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date) AND (receive_date ISNULL or receive_date IS ''))", expected_receive_date_hash)
+		select_buyers = ""
+		if excel_buyers_list == [] or excel_buyers_list == nil
+			select_buyers = ""
+			excel_buyers_list = ""
 		else
-			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent_date, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date))", expected_receive_date_hash)
+			excel_buyers_list.each_index do |buyer_index|
+				if buyer_index == 0
+					select_buyers = ' AND (orders.buyer =' + ':buyer_' + buyer_index.to_s 
+					selected_params_hash[('buyer_' + buyer_index.to_s).to_sym] = excel_buyers_list[buyer_index]
+				else
+					select_buyers = select_buyers + ' OR orders.buyer =' + ':buyer_' + buyer_index.to_s
+					selected_params_hash[('buyer_' + buyer_index.to_s).to_sym] = excel_buyers_list[buyer_index]
+				end
+			end	 
+			select_buyers = select_buyers + ')'
+		end		
+		if params[:view_all_orders] == nil or params[:view_all_orders] == "false"
+			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent_date, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date) AND (receive_date ISNULL or receive_date IS '')" + select_buyers + ")", selected_params_hash)
+		else
+			select_all_data = $db_orders.execute("SELECT orders.buyer, buyers.fullname, buyers.telephone, buyers.city, orders.article, orders.amount, orders.supplier, orders.sent_date, orders.expected_receive_date, orders.post_name, orders.track_id FROM orders, buyers WHERE (orders.buyer=buyers.name AND (orders.expected_receive_date BETWEEN :first_date AND :second_date)" + select_buyers + ")", selected_params_hash)
 		end
 		
 		all_data_array = []
